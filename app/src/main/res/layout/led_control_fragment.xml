@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:pikolo="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/waypoint_list_bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/bottom_sheet_padding_bottom"
+    app:behavior_hideable="false"
+    app:behavior_peekHeight="700dp"
+    app:layout_behavior="@string/bottom_sheet_behavior">
+
+    <TextView
+        android:id="@+id/led_control_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/led_control_title"
+        android:textColor="@color/bottom_sheet_title_text"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/close_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="16dp"
+        android:src="@drawable/ic_baseline_close_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/button_led_power"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="16dp"
+        android:src="@drawable/ic_baseline_power_settings_new_24"
+        app:layout_constraintEnd_toStartOf="@+id/close_button"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
+        android:layout_marginTop="15dp"
+        android:background="@color/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/led_control_title" />
+
+    <com.madrapps.pikolo.HSLColorPicker
+        android:id="@+id/led_control_color_picker"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:nestedScrollingEnabled="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/brightness_seek_bar"
+        pikolo:arc_length="110"
+        pikolo:hue_start_angle="30"
+        pikolo:lightness_indicator_stroke_width="0dp"
+        pikolo:lightness_start_angle="270"
+        pikolo:radius_offset="20dp"
+        pikolo:saturation_start_angle="150" />
+
+    <!--    <com.madrapps.pikolo.RGBColorPicker-->
+    <!--        android:id="@+id/led_control_color_picker"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="400dp"-->
+    <!--        android:nestedScrollingEnabled="true"-->
+    <!--        android:paddingHorizontal="30dp"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/divider"-->
+    <!--        pikolo:arc_length="110"-->
+    <!--        pikolo:blue_indicator_stroke_width="0dp"-->
+    <!--        pikolo:blue_start_angle="270"-->
+    <!--        pikolo:green_start_angle="150"-->
+    <!--        pikolo:radius_offset="20dp"-->
+    <!--        pikolo:red_start_angle="30" />-->
+
+    <TextView
+        android:id="@+id/brightness_description"
+        android:layout_width="81dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/led_control_brightness"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+    <SeekBar
+        android:id="@+id/brightness_seek_bar"
+        style="@style/Widget.AppCompat.SeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        android:max="255"
+        android:progress="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/brightness_description" />
+
+    <ImageView
+        android:id="@+id/color_preview_view"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_circle"
+        app:layout_constraintBottom_toBottomOf="@+id/led_control_color_picker"
+        app:layout_constraintEnd_toEndOf="@+id/led_control_color_picker"
+        app:layout_constraintStart_toStartOf="@+id/led_control_color_picker"
+        app:layout_constraintTop_toTopOf="@+id/led_control_color_picker"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/color_preset_blue"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_circle"
+        android:backgroundTint="@color/green"
+        android:elevation="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/color_preset_green"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/color_preset_red"
+        app:layout_constraintTop_toBottomOf="@+id/led_control_color_picker"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/color_preset_red"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_circle"
+        android:backgroundTint="@color/red"
+        android:elevation="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/color_preset_blue"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/led_control_color_picker"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/color_preset_green"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_circle"
+        android:backgroundTint="@color/blue"
+        android:elevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/color_preset_blue"
+        app:layout_constraintTop_toBottomOf="@+id/led_control_color_picker"
+        tools:ignore="ContentDescription" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_status_card"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:theme="@style/NavStatusCardView"
+    android:visibility="visible"
+    app:cardBackgroundColor="#CC424242"
+    app:cardElevation="0dp">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp">
+
+        <TableRow>
+
+            <TextView android:text="@string/nav_status_gps_fix" />
+
+            <TextView
+                android:id="@+id/nav_status_gps_fix"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                tools:text="3D" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView android:text="@string/nav_status_gps_mode" />
+
+            <TextView
+                android:id="@+id/nav_status_gps_mode"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                tools:text="None" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView android:text="@string/nav_status_satellites" />
+
+            <TextView
+                android:id="@+id/nav_status_satellites"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                tools:text="12" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView android:text="@string/nav_status_altitude" />
+
+            <TextView
+                android:id="@+id/nav_status_altitude"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                tools:text="5 m" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/gps_status_speed" />
+
+            <TextView
+                android:id="@+id/gps_status_speed"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                tools:text="0.2 m/s" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView android:text="@string/nav_status_nav_state" />
+
+            <TextView
+                android:id="@+id/nav_status_nav_state"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                tools:text="Landing" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView android:text="@string/nav_status_wp_number" />
+
+            <TextView
+                android:id="@+id/nav_status_wp_number"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                tools:text="3" />
+        </TableRow>
+    </TableLayout>
+</androidx.cardview.widget.CardView>

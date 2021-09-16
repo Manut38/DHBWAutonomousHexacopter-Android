@@ -1,0 +1,31 @@
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<resources>
+    <color name="primaryColor">#283593</color>
+    <color name="primaryLightColor">#5f5fc4</color>
+    <color name="primaryDarkColor">#001064</color>
+    <color name="secondaryColor">#ffa000</color>
+    <color name="secondaryLightColor">#ffd149</color>
+    <color name="secondaryDarkColor">#c67100</color>
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="secondaryTextColor">#000000</color>
+
+    <color name="fab_disconnected">#f44336</color>
+    <color name="fab_mqtt_connected">#7cb342</color>
+    <color name="fab_drone_online">#ffa000</color>
+
+    <color name="route">#ffa000</color>
+    <color name="jump">#4dd0e1</color>
+    <color name="rth">#f44336</color>
+
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+
+    <color name="bottom_sheet_title_text">@color/black</color>
+    <color name="divider">#447e7e7e</color>
+
+    <color name="red">#FF0000</color>
+    <color name="green">#00FF00</color>
+    <color name="blue">#0000FF</color>
+</resources>
+
+

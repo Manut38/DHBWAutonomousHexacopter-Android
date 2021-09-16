@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="waypoint"
+            type="net.gyroinc.dhbwhexacopter.models.Waypoint" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="8dp"
+        app:cardPreventCornerOverlap="true"
+        app:cardUseCompatPadding="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/waypoint_item_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginVertical="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/waypoint_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{@string/waypoint_list_item_title(waypoint.wpNum)}"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@string/waypoint_list_item_title" />
+
+                <TextView
+                    android:id="@+id/waypoint_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{@stringArray/waypoint_types[waypoint.type - 1]}"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/waypoint_title"
+                    tools:text="TYPE" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/waypoint_item_guide"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_begin="130dp" />
+
+                <TextView
+                    android:id="@+id/waypoint_item_altitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{@string/waypoint_list_altitude(waypoint.altitude)}"
+                    app:goneUnless="@{waypoint.jumpable}"
+                    app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@string/waypoint_list_altitude" />
+
+                <TextView
+                    android:id="@+id/waypoint_item_speed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{@string/waypoint_list_speed(waypoint.speed)}"
+                    app:goneUnless="@{waypoint.requiresSpeed}"
+                    app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
+                    app:layout_constraintTop_toBottomOf="@+id/waypoint_item_altitude"
+                    tools:text="@string/waypoint_list_speed" />
+
+                <TextView
+                    android:id="@+id/waypoint_item_wait_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{@string/waypoint_list_wait_time(waypoint.waitTime)}"
+                    app:goneUnless="@{waypoint.type == waypoint.TYPE_POSHOLD_TIME}"
+                    app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
+                    app:layout_constraintTop_toBottomOf="@+id/waypoint_item_speed"
+                    tools:text="@string/waypoint_list_wait_time" />
+
+                <TextView
+                    android:id="@+id/waypoint_item_rth_land"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text='@{@string/waypoint_list_rth_land(waypoint.rthLand ? "yes": "no")}'
+                    app:goneUnless="@{waypoint.type == waypoint.TYPE_RTH}"
+                    app:layout_constraintStart_toEndOf="@id/waypoint_item_guide"
+                    app:layout_constraintTop_toBottomOf="@+id/waypoint_item_wait_time"
+                    tools:text="@string/waypoint_list_rth_land" />
+
+                <TextView
+                    android:id="@+id/waypoint_item_jump_target"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text='@{@string/waypoint_list_jump_target(waypoint.jumpTarget)}'
+                    app:goneUnless="@{waypoint.type == waypoint.TYPE_JUMP}"
+                    app:layout_constraintStart_toEndOf="@id/waypoint_item_guide"
+                    app:layout_constraintTop_toBottomOf="@+id/waypoint_item_rth_land"
+                    tools:text="@string/waypoint_list_jump_target" />
+
+                <TextView
+                    android:id="@+id/waypoint_item_jump_repeat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text='@{@string/waypoint_list_jump_repeat(waypoint.jumpRepeat)}'
+                    app:goneUnless="@{waypoint.type == waypoint.TYPE_JUMP}"
+                    app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
+                    app:layout_constraintTop_toBottomOf="@+id/waypoint_item_jump_target"
+                    tools:text="@string/waypoint_list_jump_repeat" />
+
+                <TextView
+                    android:id="@+id/waypoint_item_heading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text='@{@string/waypoint_list_heading(waypoint.heading)}'
+                    app:goneUnless="@{waypoint.type == waypoint.TYPE_SET_HEAD &amp;&amp; !waypoint.headingReset}"
+                    app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
+                    app:layout_constraintTop_toBottomOf="@+id/waypoint_item_jump_repeat"
+                    tools:text="@string/waypoint_list_heading" />
+
+                <TextView
+                    android:id="@+id/waypoint_item_heading_reset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text='@{@string/waypoint_list_heading_reset(waypoint.headingReset ? "yes": "no")}'
+                    app:goneUnless="@{waypoint.type == waypoint.TYPE_SET_HEAD}"
+                    app:layout_constraintStart_toEndOf="@id/waypoint_item_guide"
+                    app:layout_constraintTop_toBottomOf="@+id/waypoint_item_heading"
+                    tools:text="@string/waypoint_list_heading_reset" />
+
+                <TextView
+                    android:id="@+id/waypoint_item_elevation_adjustment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text='@{@string/waypoint_list_elevation_adjustment(waypoint.elevationAdjustment)}'
+                    app:goneUnless="@{waypoint.type == waypoint.TYPE_LAND}"
+                    app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
+                    app:layout_constraintTop_toBottomOf="@+id/waypoint_item_heading_reset"
+                    tools:text='@string/waypoint_list_elevation_adjustment' />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <ImageView
+                android:id="@+id/location_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:src="@drawable/ic_baseline_pin_drop_24"
+                app:goneUnless="@{waypoint.visibleOnMap}"
+                app:layout_constraintEnd_toStartOf="@id/drag_icon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/drag_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="16dp"
+                android:paddingEnd="16dp"
+                android:src="@drawable/ic_baseline_drag_indicator_24"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+</layout>

@@ -1,0 +1,72 @@
+<resources>
+    <!-- Dark Mode ListPreference -->
+    <string-array name="dark_mode_entries">
+        <item>Follow System Theme</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+
+    <string-array name="dark_mode_values">
+        <item>MODE_NIGHT_FOLLOW_SYSTEM</item>
+        <item>MODE_NIGHT_NO</item>
+        <item>MODE_NIGHT_YES</item>
+    </string-array>
+
+    <string-array name="waypoint_types">
+        <item>WAYPOINT</item>
+        <item>POSHOLD_UNLIM</item>
+        <item>POSHOLD_TIME</item>
+        <item>RTH</item>
+        <item>SET_POI</item>
+        <item>JUMP</item>
+        <item>SET_HEAD</item>
+        <item>LAND</item>
+    </string-array>
+
+    <string-array name="nav_status_gps_mode">
+        <item>None</item>
+        <item>PosHold</item>
+        <item>RTH</item>
+        <item>Mission</item>
+    </string-array>
+
+    <string-array name="nav_status_nav_state">
+        <item>None</item>
+        <item>RTH Start</item>
+        <item>RTH Enroute</item>
+        <item>Hold Infinity</item>
+        <item>Hold Timed</item>
+        <item>WP Enroute</item>
+        <item>Process Next</item>
+        <item>Do Jump</item>
+        <item>Land Start</item>
+        <item>Landing</item>
+        <item>Landed</item>
+        <item>Land Settle</item>
+        <item>Land Start Descent</item>
+        <item>Hover Above Home</item>
+        <item>Emergency Landing</item>
+        <item>RTH Climb</item>
+    </string-array>
+
+    <string-array name="nav_status_gps_fix">
+        <item>None</item>
+        <item>2D</item>
+        <item>3D</item>
+    </string-array>
+
+    <string-array name="nav_status_error_description">
+        <item>All systems clear</item>
+        <item>Next waypoint distance is more than safety distance</item>
+        <item>GPS reception is compromised - Nav paused - Copter is adrift!</item>
+        <item>CRC error reading WP data from EEPROM - Nav stopped</item>
+        <item>End flag detected, navigation finished</item>
+        <item>Waiting for poshold timer</item>
+        <item>Invalid jump target detected, aborting</item>
+        <item>Invalid mission step action code, aborting, copter is adrift</item>
+        <item>Waiting to reach RTH Altitude</item>
+        <item>Gps fix lost, aborting mission</item>
+        <item>NAV engine disabled due disarm</item>
+        <item>Landing</item>
+    </string-array>
+</resources>

@@ -1,0 +1,80 @@
+<resources>
+    <string name="app_name">DHBW Autonomous Hexacopter</string>
+    <string name="title_activity_mission_planner">DHBW Hexacopter</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preferences -->
+
+    <!-- MQTT -->
+    <string name="settings_header_mqtt">MQTT</string>
+    <string name="mqtt_server">Server Address</string>
+    <string name="mqtt_port">Port</string>
+    <string name="mqtt_username">Username</string>
+    <string name="mqtt_password">Password</string>
+    <string name="mqtt_use_tls">Use TLS</string>
+
+    <!-- UI -->
+    <string name="settings_header_app">App</string>
+    <string name="settings_app_theme">App Theme</string>
+    <string name="settings_app_theme_default_value">MODE_NIGHT_FOLLOW_SYSTEM</string>
+
+    <!-- Mission Planner -->
+
+    <!-- Menus -->
+    <string name="menu_settings">Settings</string>
+    <string name="menu_disconnect">Disconnect</string>
+    <string name="menu_led">LEDs</string>
+
+    <!-- Waypoint Dialog -->
+    <string name="add_waypoint">Add Waypoint</string>
+    <string name="waypoint_dialog_title">"Waypoint %1$d"</string>
+    <string name="waypoint_dialog_type">Waypoint Type</string>
+    <string name="waypoint_dialog_altitude">Altitude [m]</string>
+    <string name="waypoint_dialog_speed">Speed [m/s]</string>
+    <string name="waypoint_dialog_save">SAVE</string>
+    <string name="waypoint_dialog_delete">DELETE</string>
+
+    <!-- Status Overlay -->
+    <string name="nav_status_gps_mode">GPS Mode</string>
+    <string name="nav_status_nav_state">Nav State</string>
+    <string name="nav_status_wp_number">WP Number</string>
+    <string name="gps_status_speed">Speed</string>
+    <string name="gps_status_speed_value">%.2f m/s</string>
+    <string name="gps_status_altitude_value">%d m</string>
+
+    <!-- Waypoint Properties -->
+    <string name="waypoint_dialog_land">Land</string>
+    <string name="waypoint_dialog_wait_time">Wait Time [s]</string>
+    <string name="waypoint_dialog_jump_target">Target WP</string>
+    <string name="waypoint_dialog_jump_repeats"># of Repeats</string>
+    <string name="waypoint_dialog_elevation_adjustment">Elevation Adjustment [m]</string>
+    <string name="waypoint_dialog_heading">Heading [deg]</string>
+    <string name="waypoint_dialog_heading_reset">Reset</string>
+
+    <!-- Waypoint List -->
+    <string name="waypoint_list_title">Waypoints</string>
+    <string name="waypoint_list_item_title">#%d</string>
+    <string name="waypoint_list_altitude">Alt: %.2f m</string>
+    <string name="waypoint_list_speed">Speed: %.2f m/s</string>
+    <string name="waypoint_list_wait_time">Wait: %d s</string>
+    <string name="waypoint_list_rth_land">Land: %s</string>
+    <string name="waypoint_list_jump_target">Target: %d</string>
+    <string name="waypoint_list_jump_repeat">Repeat: %dx</string>
+    <string name="waypoint_list_heading">Head: %d°</string>
+    <string name="waypoint_list_heading_reset">Reset: %s</string>
+    <string name="waypoint_list_elevation_adjustment">ElevAdj: %d m</string>
+    <string name="waypoint_list_button_add_rth">Add RTH</string>
+    <string name="waypoint_list_button_add_jump">Add JUMP</string>
+    <string name="waypoint_list_button_clear">Clear List</string>
+    <string name="waypoint_list_clear_confirm">Do you really want to clear all waypoints?</string>
+
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="led_control_title">LED Control</string>
+    <string name="led_control_brightness">Brightness</string>
+    <string name="nav_status_satellites">Satellites</string>
+    <string name="nav_status_altitude">Altitude</string>
+    <string name="nav_status_gps_fix">GPS Fix</string>
+    <string name="error_status_card_title">Status</string>
+
+</resources>
