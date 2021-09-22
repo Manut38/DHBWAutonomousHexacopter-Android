@@ -9,6 +9,8 @@
     <color name="primaryTextColor">#ffffff</color>
     <color name="secondaryTextColor">#000000</color>
 
+    <color name="bottom_bar_color">#283593</color>
+
     <color name="fab_disconnected">#f44336</color>
     <color name="fab_mqtt_connected">#7cb342</color>
     <color name="fab_drone_online">#ffa000</color>
@@ -20,12 +22,21 @@
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
 
-    <color name="bottom_sheet_title_text">@color/black</color>
     <color name="divider">#447e7e7e</color>
 
     <color name="red">#FF0000</color>
     <color name="green">#00FF00</color>
     <color name="blue">#0000FF</color>
+
+
+    <color name="red_200">#cf6679</color> <!--Color error (dark)-->
+    <color name="red_600">#b00020</color> <!--Color error (light)-->
+
+    <color name="white_50">#ffffff</color>
+
+    <color name="black_800">#121212</color> <!--Color surface (dark)-->
+    <color name="black_900">#000000</color>
+
 </resources>
 
 

@@ -1,18 +1,48 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.DHBWHexacopter" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
+    <!--Top level DayNight theme to be used in AndroidManifest.xml-->
+    <style name="Theme.DHBWHexacopter" parent="Base.Theme.DHBWHexacopter" />
+    <!--Base custom theme which will be shared between both light and dark theme variants-->
+    <style name="Base.Theme.DHBWHexacopter" parent="Base.Theme.MaterialThemeBuilder">
+
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryVariant">@color/primaryDarkColor</item>
-        <item name="colorOnPrimary">@color/primaryTextColor</item>
-        <!-- Secondary brand color. -->
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
+
+        <item name="android:colorBackground">@color/white_50</item>
+        <item name="colorSurface">@color/white_50</item>
+        <item name="colorError">@color/red_600</item>
+        <!--"On" colors define how text, icons and strokes are colored in relation to the surface-->
+        <!--on which they appear.   -->
+        <item name="colorOnPrimary">@color/white_50</item>
         <item name="colorOnSecondary">@color/secondaryTextColor</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
-        <item name="android:textViewStyle">@style/TextViewStyle</item>
-        <item name="bottomSheetDialogTheme">@style/BottomSheetDialog</item>
+        <item name="colorOnBackground">@color/black_900</item>
+        <item name="colorOnSurface">@color/black_900</item>
+        <item name="colorOnError">@color/white_50</item>
+
+        <!-- Shape Appearance -->
+        <item name="shapeAppearanceLargeComponent">
+            @style/ShapeAppearance.App.LargeComponent
+        </item>
+
+        <!--Component styles-->
+        <item name="alertDialogTheme">@style/ThemeOverlay.MaterialComponents.Dialog.Alert</item>
+        <item name="bottomSheetDialogTheme">
+            @style/ThemeOverlay.DHBWHexacopter.BottomSheetDialog.Light
+        </item>p
+        <item name="textInputStyle">@style/Widget.DHBWHexacopter.TextInputLayout.FilledBox
+        </item>
+
+    </style>
+
+    <!-- Base Theme -->
+    <style name="Base.Theme.MaterialThemeBuilder" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimary</item>
+        <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">
+            ?android:attr/colorBackground
+        </item>
+        <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>
     </style>
 </resources>

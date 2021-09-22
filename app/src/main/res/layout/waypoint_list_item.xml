@@ -28,6 +28,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="12dp"
                 android:layout_marginVertical="8dp"
+                android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -155,7 +156,7 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="16dp"
-                android:src="@drawable/ic_baseline_pin_drop_24"
+                android:src="@drawable/ic_outline_pin_drop_24"
                 app:goneUnless="@{waypoint.visibleOnMap}"
                 app:layout_constraintEnd_toStartOf="@id/drag_icon"
                 app:layout_constraintTop_toTopOf="parent" />

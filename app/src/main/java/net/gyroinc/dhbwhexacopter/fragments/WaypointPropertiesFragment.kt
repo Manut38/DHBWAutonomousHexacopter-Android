@@ -7,10 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.switchmaterial.SwitchMaterial
 import net.gyroinc.dhbwhexacopter.R
 import net.gyroinc.dhbwhexacopter.activities.MissionPlannerActivity
 import net.gyroinc.dhbwhexacopter.models.MainViewModel
@@ -18,11 +18,11 @@ import net.gyroinc.dhbwhexacopter.models.Waypoint
 import net.gyroinc.dhbwhexacopter.utils.InputFilterMinMax
 
 class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickListener,
-    AdapterView.OnItemSelectedListener {
+    AdapterView.OnItemClickListener {
 
     private val viewModel: MainViewModel by activityViewModels()
     private var waypointIndex: Int = 0
-    private lateinit var typeSpinner: Spinner
+    private lateinit var typeSpinner: AutoCompleteTextView
     private lateinit var propertiesView: LinearLayout
     var onDismissListener: DialogInterface.OnDismissListener? = null
 
@@ -47,16 +47,12 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
         waypointTitle.text = getString(R.string.waypoint_dialog_title, waypointIndex + 1)
 
         typeSpinner = view.findViewById(R.id.waypoint_type_spinner)
-
         ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.waypoint_types,
-            android.R.layout.simple_spinner_dropdown_item
+            requireContext(), R.array.waypoint_types, R.layout.list_item
         ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            typeSpinner.adapter = adapter
+            typeSpinner.setAdapter(adapter)
+            typeSpinner.onItemClickListener = this
         }
-        typeSpinner.onItemSelectedListener = this
 
         restoreWaypointType()
 
@@ -64,43 +60,9 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
     }
 
     private fun restoreWaypointType() {
-        when (viewModel.waypoints[waypointIndex].getType()) {
-            Waypoint.TYPE_WAYPOINT -> {
-                typeSpinner.setSelection(getSpinnerIndex(typeSpinner, "WAYPOINT"))
-            }
-            Waypoint.TYPE_POSHOLD_UNLIM -> {
-                typeSpinner.setSelection(getSpinnerIndex(typeSpinner, "POSHOLD_UNLIM"))
-            }
-            Waypoint.TYPE_POSHOLD_TIME -> {
-                typeSpinner.setSelection(getSpinnerIndex(typeSpinner, "POSHOLD_TIME"))
-            }
-            Waypoint.TYPE_RTH -> {
-                typeSpinner.setSelection(getSpinnerIndex(typeSpinner, "RTH"))
-            }
-            Waypoint.TYPE_SET_POI -> {
-                typeSpinner.setSelection(getSpinnerIndex(typeSpinner, "SET_POI"))
-            }
-            Waypoint.TYPE_JUMP -> {
-                typeSpinner.setSelection(getSpinnerIndex(typeSpinner, "JUMP"))
-            }
-            Waypoint.TYPE_SET_HEAD -> {
-                typeSpinner.setSelection(getSpinnerIndex(typeSpinner, "SET_HEAD"))
-            }
-            Waypoint.TYPE_LAND -> {
-                typeSpinner.setSelection(getSpinnerIndex(typeSpinner, "LAND"))
-            }
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        // TODO: Use the ViewModel
+        val type = viewModel.waypoints[waypointIndex].getType()
+        typeSpinner.setText(typeSpinner.adapter.getItem(type-1).toString(), false)
+        setWaypointType(type)
     }
 
     override fun onClick(v: View) {
@@ -115,38 +77,36 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
         }
     }
 
-    override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
+    override fun onItemClick(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+        setWaypointType(pos + 1)
+    }
+
+    private fun setWaypointType(type: Int) {
         propertiesView.removeAllViews()
-        when (parent.getItemAtPosition(pos).toString()) {
-            "WAYPOINT" -> {
-                viewModel.waypoints[waypointIndex].setType(Waypoint.TYPE_WAYPOINT)
+        viewModel.waypoints[waypointIndex].setType(type)
+        when (type) {
+            Waypoint.TYPE_WAYPOINT -> {
                 layoutInflater.inflate(R.layout.waypoint_type_wp, propertiesView)
             }
-            "POSHOLD_UNLIM" -> {
-                viewModel.waypoints[waypointIndex].setType(Waypoint.TYPE_POSHOLD_UNLIM)
+            Waypoint.TYPE_POSHOLD_UNLIM -> {
                 layoutInflater.inflate(R.layout.waypoint_type_poshold_unlim, propertiesView)
             }
-            "POSHOLD_TIME" -> {
-                viewModel.waypoints[waypointIndex].setType(Waypoint.TYPE_POSHOLD_TIME)
+            Waypoint.TYPE_POSHOLD_TIME -> {
                 layoutInflater.inflate(R.layout.waypoint_type_poshold_time, propertiesView)
             }
-            "RTH" -> {
-                viewModel.waypoints[waypointIndex].setType(Waypoint.TYPE_RTH)
+            Waypoint.TYPE_RTH -> {
                 layoutInflater.inflate(R.layout.waypoint_type_rth, propertiesView)
             }
-            "SET_POI" -> {
-                viewModel.waypoints[waypointIndex].setType(Waypoint.TYPE_SET_POI)
+            Waypoint.TYPE_SET_POI -> {
+
             }
-            "JUMP" -> {
-                viewModel.waypoints[waypointIndex].setType(Waypoint.TYPE_JUMP)
+            Waypoint.TYPE_JUMP -> {
                 layoutInflater.inflate(R.layout.waypoint_type_jump, propertiesView)
             }
-            "SET_HEAD" -> {
-                viewModel.waypoints[waypointIndex].setType(Waypoint.TYPE_SET_HEAD)
+            Waypoint.TYPE_SET_HEAD -> {
                 layoutInflater.inflate(R.layout.waypoint_type_set_head, propertiesView)
             }
-            "LAND" -> {
-                viewModel.waypoints[waypointIndex].setType(Waypoint.TYPE_LAND)
+            Waypoint.TYPE_LAND -> {
                 layoutInflater.inflate(R.layout.waypoint_type_land, propertiesView)
             }
         }
@@ -223,33 +183,19 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
             }
         }
 
-        val landSwitch: SwitchCompat? =
+        val landSwitch: SwitchMaterial? =
             propertiesView.findViewById(R.id.waypoint_rth_land_switch)
         landSwitch?.isChecked = viewModel.waypoints[waypointIndex].rthLand
         landSwitch?.setOnCheckedChangeListener { _, isChecked ->
             viewModel.waypoints[waypointIndex].rthLand = isChecked
         }
 
-        val headingReset: SwitchCompat? =
+        val headingReset: SwitchMaterial? =
             propertiesView.findViewById(R.id.waypoint_heading_reset_switch)
         headingReset?.isChecked = viewModel.waypoints[waypointIndex].headingReset
         headingReset?.setOnCheckedChangeListener { _, isChecked ->
             viewModel.waypoints[waypointIndex].headingReset = isChecked
         }
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>?) {
-
-    }
-
-    private fun getSpinnerIndex(spinner: Spinner, string: String): Int {
-        var index = 0
-        for (i in 0 until spinner.count) {
-            if (spinner.getItemAtPosition(i) == string) {
-                index = i
-            }
-        }
-        return index
     }
 
     override fun onDismiss(dialog: DialogInterface) {

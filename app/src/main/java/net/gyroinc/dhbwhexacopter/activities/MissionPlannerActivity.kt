@@ -10,8 +10,11 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
-import android.view.*
-import android.widget.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -73,7 +76,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mission_planner)
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
         //Bind View Model
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
@@ -267,7 +270,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
                     R.menu.menu_disconnected
                 )
                 fab.backgroundTintList = getColorStateList(R.color.fab_disconnected)
-                fab.setImageResource(R.drawable.ic_baseline_power_settings_new_24)
+                fab.setImageResource(R.drawable.ic_outline_power_settings_new_24)
                 if (this::dronePositionMarker.isInitialized) dronePositionMarker.isVisible = false
                 navStatusCard.isVisible = false
                 errorStatusCard.isVisible = false
@@ -278,7 +281,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
                     R.menu.menu_disconnected
                 )
                 fab.backgroundTintList = getColorStateList(R.color.fab_mqtt_connected)
-                fab.setImageResource(R.drawable.ic_baseline_power_settings_new_24)
+                fab.setImageResource(R.drawable.ic_outline_power_settings_new_24)
                 if (this::dronePositionMarker.isInitialized) dronePositionMarker.isVisible = false
                 navStatusCard.isVisible = false
                 errorStatusCard.isVisible = false
@@ -300,7 +303,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         map = googleMap ?: return
         map.setOnMyLocationClickListener(this)
         bottomAppBar.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        val paddingBottom = bottomAppBar.measuredHeight + getNavigationBarHeight()
+        val paddingBottom = bottomAppBar.measuredHeight
         Log.d(TAG, paddingBottom.toString())
 
         map.setPadding(
@@ -349,7 +352,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
             == PackageManager.PERMISSION_GRANTED
         ) {
             map.isMyLocationEnabled = true
-            locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager;
+            locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 400, 1000f, this)
         } else {
             // Permission to access the location is missing. Show rationale and request permission
@@ -566,10 +569,6 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
 
     private fun showStatusSnackBar(message: String, length: Int) {
         val snack: Snackbar = Snackbar.make(mainLayout, message, length)
-//        val view: View = snack.view
-//        val params = view.layoutParams as CoordinatorLayout.LayoutParams
-//        params.gravity = Gravity.TOP
-//        view.layoutParams = params
         snack.show()
     }
 

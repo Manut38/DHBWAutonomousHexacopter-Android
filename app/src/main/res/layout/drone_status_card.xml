@@ -8,7 +8,7 @@
     android:theme="@style/NavStatusCardView"
     android:visibility="visible"
     app:cardBackgroundColor="#CC424242"
-    app:cardElevation="0dp">
+    app:cardElevation="16dp">
 
     <TableLayout
         android:layout_width="match_parent"

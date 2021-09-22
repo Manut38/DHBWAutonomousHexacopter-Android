@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bottom_sheet_title_text">@color/white</color>
+    <color name="primaryColor">#5f5fc4</color>
+    <color name="primaryDarkColor">#001064</color>
 </resources>

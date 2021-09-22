@@ -16,7 +16,7 @@
     <!-- UI -->
     <string name="settings_header_app">App</string>
     <string name="settings_app_theme">App Theme</string>
-    <string name="settings_app_theme_default_value">MODE_NIGHT_FOLLOW_SYSTEM</string>
+    <string name="settings_app_theme_default_value">MODE_NIGHT_YES</string>
 
     <!-- Mission Planner -->
 
@@ -76,5 +76,5 @@
     <string name="nav_status_altitude">Altitude</string>
     <string name="nav_status_gps_fix">GPS Fix</string>
     <string name="error_status_card_title">Status</string>
-
+    <string name="waypoint_list_empty">No Waypoints</string>
 </resources>

@@ -23,7 +23,7 @@
         android:theme="@style/NavStatusCardView"
         android:visibility="invisible"
         app:cardBackgroundColor="#CC424242"
-        app:cardElevation="0dp">
+        app:cardElevation="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:theme="@style/Widget.MaterialComponents.BottomAppBar.Colored"
-            app:backgroundTint="@color/primaryColor"
+            app:backgroundTint="@color/bottom_bar_color"
             app:fabAlignmentMode="center"
             app:fabAnimationMode="slide"
             app:menu="@menu/menu_disconnected"
@@ -70,11 +70,11 @@
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_power_settings_new_24"
+            android:src="@drawable/ic_outline_power_settings_new_24"
             android:visibility="visible"
             app:backgroundTint="@color/fab_disconnected"
             app:layout_anchor="@id/bottom_app_bar" />
-wa
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

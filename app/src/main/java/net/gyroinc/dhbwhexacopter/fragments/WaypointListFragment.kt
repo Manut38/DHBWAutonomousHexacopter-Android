@@ -1,26 +1,19 @@
 package net.gyroinc.dhbwhexacopter.fragments
 
-import android.R.attr.data
 import android.content.DialogInterface
 import android.os.Bundle
-import android.os.Debug
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.size
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
 import com.ernestoyaquello.dragdropswiperecyclerview.listener.OnItemDragListener
 import com.ernestoyaquello.dragdropswiperecyclerview.listener.OnItemSwipeListener
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import net.gyroinc.dhbwhexacopter.R
 import net.gyroinc.dhbwhexacopter.WaypointListAdapter
@@ -36,6 +29,7 @@ class WaypointListFragment : BottomSheetDialogFragment() {
     private lateinit var buttonClear: ImageView
     private lateinit var buttonAddRth: ImageView
     private lateinit var buttonAddJump: ImageView
+    private lateinit var textViewNoWaypoints: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,7 +72,11 @@ class WaypointListFragment : BottomSheetDialogFragment() {
         }
 
         waypointListAdapter =
-            WaypointListAdapter(viewModel.waypoints, onItemClickListener, onLocationClickListener)
+            WaypointListAdapter(
+                viewModel.waypoints,
+                onItemClickListener,
+                onLocationClickListener
+            )
         waypointList.adapter = waypointListAdapter
 
         waypointList.swipeListener = object : OnItemSwipeListener<Waypoint> {
@@ -88,7 +86,6 @@ class WaypointListFragment : BottomSheetDialogFragment() {
                 item: Waypoint
             ): Boolean {
                 (activity as MissionPlannerActivity).onWaypointRemoved(position)
-
                 return false
             }
         }
@@ -117,6 +114,9 @@ class WaypointListFragment : BottomSheetDialogFragment() {
                         waypointListAdapter.removeItem(0)
                     }
                 }
+                setNegativeButton(R.string.dialog_cancel) { dialog, id ->
+                    dialog.cancel()
+                }
             }
             builder?.create()?.show()
         }
@@ -136,11 +136,14 @@ class WaypointListFragment : BottomSheetDialogFragment() {
             waypointList.smoothScrollToPosition(waypointListAdapter.itemCount - 1)
         }
 
-        return view
-    }
+//        textViewNoWaypoints = view.findViewById(R.id.no_waypoints)
+//
+//        viewModel.waypoints.addOnListChangedCallback().observe(this, { waypoints ->
+//            textViewNoWaypoints.visibility =
+//                if (waypoints.isNotEmpty()) View.GONE else View.VISIBLE
+//        })
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+        return view
     }
 
     companion object {

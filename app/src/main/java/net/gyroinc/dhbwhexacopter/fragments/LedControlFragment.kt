@@ -6,7 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.fragment.app.activityViewModels
 import androidx.preference.PreferenceManager
@@ -85,7 +86,7 @@ class LedControlFragment : BottomSheetDialogFragment() {
         view.findViewById<ImageView>(R.id.color_preset_green).setOnClickListener(onPresetClick)
         view.findViewById<ImageView>(R.id.color_preset_blue).setOnClickListener(onPresetClick)
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         setPickedColor(prefs.getInt("ledControlColor", requireContext().getColor(R.color.red)))
         brightnessSeekBar.progress = prefs.getInt("ledControlBrightness", 0)
         return view
