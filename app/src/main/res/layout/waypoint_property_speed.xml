@@ -8,6 +8,6 @@
         android:id="@+id/waypoint_speed"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        android:maxLength="2" />
+        android:inputType="phone|numberDecimal"
+        android:maxLength="4"/>
 </com.google.android.material.textfield.TextInputLayout>

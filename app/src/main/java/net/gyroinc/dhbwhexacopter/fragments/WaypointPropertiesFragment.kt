@@ -61,7 +61,7 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
 
     private fun restoreWaypointType() {
         val type = viewModel.waypoints[waypointIndex].getType()
-        typeSpinner.setText(typeSpinner.adapter.getItem(type-1).toString(), false)
+        typeSpinner.setText(typeSpinner.adapter.getItem(type - 1).toString(), false)
         setWaypointType(type)
     }
 
@@ -114,72 +114,75 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
         (activity as MissionPlannerActivity).updatePolylines()
 
         val altitude: EditText? = propertiesView.findViewById(R.id.waypoint_altitude)
-        altitude?.filters = arrayOf<InputFilter>(InputFilterMinMax(2f, 30f))
+        altitude?.filters = arrayOf(InputFilterMinMax(1f, 40f))
         altitude?.setText(viewModel.waypoints[waypointIndex].altitude.toString())
         altitude?.doOnTextChanged { text, _, _, _ ->
-            if (text != null) {
-                if (text.isNotEmpty())
-                    viewModel.waypoints[waypointIndex].altitude = text.toString().toFloat()
-            }
+            if (!text.isNullOrEmpty())
+                viewModel.waypoints[waypointIndex].altitude = text.toString().toFloat()
         }
 
         val speed: EditText? = propertiesView.findViewById(R.id.waypoint_speed)
-        speed?.filters = arrayOf<InputFilter>(InputFilterMinMax(0.01f, 2f))
+        speed?.filters = arrayOf(InputFilterMinMax(0f, 2f))
         speed?.setText(viewModel.waypoints[waypointIndex].speed.toString())
         speed?.doOnTextChanged { text, _, _, _ ->
-            if (text != null) {
-                if (text.isNotEmpty())
-                    viewModel.waypoints[waypointIndex].speed = text.toString().toFloat()
-            }
+            if (!text.isNullOrEmpty())
+                viewModel.waypoints[waypointIndex].speed = text.toString().toFloat()
         }
 
         val waitTime: EditText? = propertiesView.findViewById(R.id.waypoint_wait_time)
         waitTime?.setText(viewModel.waypoints[waypointIndex].waitTime.toString())
         waitTime?.doOnTextChanged { text, _, _, _ ->
-            if (text != null) {
-                if (text.isNotEmpty())
-                    viewModel.waypoints[waypointIndex].waitTime = text.toString().toInt()
-            }
+            if (!text.isNullOrEmpty())
+                viewModel.waypoints[waypointIndex].waitTime = text.toString().toInt()
         }
 
         val jumpTarget: EditText? = propertiesView.findViewById(R.id.waypoint_jump_target)
-        jumpTarget?.filters = arrayOf<InputFilter>(InputFilterMinMax(1f, 99f))
+        jumpTarget?.filters = arrayOf<InputFilter>(InputFilterMinMax(1f, 999f))
         jumpTarget?.setText(viewModel.waypoints[waypointIndex].jumpTarget.toString())
         jumpTarget?.doOnTextChanged { text, _, _, _ ->
-            if (text != null) {
-                if (text.isNotEmpty()) {
-                    viewModel.waypoints[waypointIndex].jumpTarget = text.toString().toInt()
-                    (activity as MissionPlannerActivity).updatePolylines()
-                }
+            if (!text.isNullOrEmpty()) {
+                viewModel.waypoints[waypointIndex].jumpTarget = text.toString().toInt()
+                (activity as MissionPlannerActivity).updatePolylines()
             }
         }
 
         val jumpRepeat: EditText? = propertiesView.findViewById(R.id.waypoint_jump_repeat)
         jumpRepeat?.setText(viewModel.waypoints[waypointIndex].jumpRepeat.toString())
-        jumpTarget?.filters = arrayOf<InputFilter>(InputFilterMinMax(-1f, 999f))
+        jumpRepeat?.filters = arrayOf<InputFilter>(InputFilterMinMax(-1f, 999f))
         jumpRepeat?.doOnTextChanged { text, _, _, _ ->
-            if (text != null) {
-                if (text.isNotEmpty())
+            if (!text.isNullOrEmpty()) {
+                try {
                     viewModel.waypoints[waypointIndex].jumpRepeat = text.toString().toInt()
+                } catch (nfe: NumberFormatException) {
+                    viewModel.waypoints[waypointIndex].jumpRepeat = 0
+                }
             }
         }
 
         val elevationAdjustment: EditText? =
             propertiesView.findViewById(R.id.waypoint_elevation_adjustment)
         elevationAdjustment?.setText(viewModel.waypoints[waypointIndex].elevationAdjustment.toString())
+        elevationAdjustment?.filters = arrayOf(InputFilterMinMax(-999f, 999f))
         elevationAdjustment?.doOnTextChanged { text, _, _, _ ->
-            if (text != null) {
-                if (text.isNotEmpty())
+            if (!text.isNullOrEmpty()) {
+                try {
                     viewModel.waypoints[waypointIndex].elevationAdjustment = text.toString().toInt()
+                } catch (nfe: NumberFormatException) {
+                    viewModel.waypoints[waypointIndex].elevationAdjustment = 0
+                }
             }
         }
 
         val heading: EditText? = propertiesView.findViewById(R.id.waypoint_heading)
         heading?.setText(viewModel.waypoints[waypointIndex].heading.toString())
+        heading?.filters = arrayOf(InputFilterMinMax(-360f, 360f))
         heading?.doOnTextChanged { text, _, _, _ ->
-            if (text != null) {
-                if (text.isNotEmpty())
+            if (!text.isNullOrEmpty()) {
+                try {
                     viewModel.waypoints[waypointIndex].heading = text.toString().toInt()
+                } catch (nfe: NumberFormatException) {
+                    viewModel.waypoints[waypointIndex].heading = 0
+                }
             }
         }
 

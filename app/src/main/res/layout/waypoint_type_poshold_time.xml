@@ -38,8 +38,8 @@
             android:id="@+id/waypoint_wait_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
-            android:maxLength="3" />
+            android:inputType="phone"
+            android:maxLength="5" />
     </com.google.android.material.textfield.TextInputLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
 

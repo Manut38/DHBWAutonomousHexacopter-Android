@@ -21,12 +21,17 @@ class InputFilterMinMax(min: Float, max: Float) : InputFilter {
         dend: Int
     ): CharSequence? {
         try {
-            val input = (dest.subSequence(0, dstart).toString() + source + dest.subSequence(
+            val inputString = (dest.subSequence(0, dstart).toString() + source + dest.subSequence(
                 dend,
                 dest.length
-            )).toFloat()
+            ))
+            if (inputString.equals("-", true) && min < 0) {
+                return null
+            }
+            val input = inputString.toFloat()
             if (isInRange(min, max, input))
                 return null
+
         } catch (nfe: NumberFormatException) {
         }
         return ""
