@@ -35,7 +35,7 @@
     </style>
 
     <style name="Widget.DHBWHexacopter.TextInputLayout.FilledBox" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
-        <item name="boxStrokeColor">?attr/colorSecondary</item>
+        <item name="boxStrokeColor">@color/filled_stroke_color</item>
         <item name="hintTextColor">?attr/colorSecondary</item>
     </style>
 
