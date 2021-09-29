@@ -410,23 +410,11 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
     }
 
     fun updatePolylines() {
-        //Draw Route Polyline
-        if (!this::routePolyline.isInitialized) routePolyline = map.addPolyline(
-            PolylineOptions()
-                .color(getColor(R.color.route))
-        )
-        routePolyline.points = viewModel.waypoints.mapNotNull { waypoint ->
-            waypoint.marker.position.takeIf {
-                listOf(
-                    Waypoint.TYPE_WAYPOINT,
-                    Waypoint.TYPE_POSHOLD_TIME,
-                    Waypoint.TYPE_POSHOLD_UNLIM,
-                    Waypoint.TYPE_LAND
-                ).contains(waypoint.getType())
-            }
-        }
+        drawRoutePolyline()
+        drawJumpPolylines()
+    }
 
-        // Draw Jump Polylines
+    private fun drawJumpPolylines() {
         if (!this::jumpPolylines.isInitialized) jumpPolylines = ArrayList()
         var visibleJumpCount = 0
         viewModel.waypoints.forEachIndexed { i, waypoint ->
@@ -458,6 +446,23 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         for (i in visibleJumpCount until jumpPolylines.size) {
             jumpPolylines[i].remove()
             jumpPolylines.removeAt(i)
+        }
+    }
+
+    private fun drawRoutePolyline() {
+        if (!this::routePolyline.isInitialized) routePolyline = map.addPolyline(
+            PolylineOptions()
+                .color(getColor(R.color.route))
+        )
+        routePolyline.points = viewModel.waypoints.mapNotNull { waypoint ->
+            waypoint.marker.position.takeIf {
+                listOf(
+                    Waypoint.TYPE_WAYPOINT,
+                    Waypoint.TYPE_POSHOLD_TIME,
+                    Waypoint.TYPE_POSHOLD_UNLIM,
+                    Waypoint.TYPE_LAND
+                ).contains(waypoint.getType())
+            }
         }
     }
 
