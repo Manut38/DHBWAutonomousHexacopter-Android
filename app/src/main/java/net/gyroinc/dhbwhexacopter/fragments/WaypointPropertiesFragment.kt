@@ -12,10 +12,11 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.switchmaterial.SwitchMaterial
 import net.gyroinc.dhbwhexacopter.R
+import net.gyroinc.dhbwhexacopter.adapters.WaypointTypeListAdapter
 import net.gyroinc.dhbwhexacopter.activities.MissionPlannerActivity
-import net.gyroinc.dhbwhexacopter.models.MainViewModel
-import net.gyroinc.dhbwhexacopter.models.Waypoint
+import net.gyroinc.dhbwhexacopter.models.*
 import net.gyroinc.dhbwhexacopter.utils.InputFilterMinMax
+import kotlin.reflect.KClass
 
 class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickListener,
     AdapterView.OnItemClickListener {
@@ -25,6 +26,7 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
     private lateinit var typeSpinner: AutoCompleteTextView
     private lateinit var propertiesView: LinearLayout
     var onDismissListener: DialogInterface.OnDismissListener? = null
+    private lateinit var waypointTypeListAdapter: WaypointTypeListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,22 +49,16 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
         waypointTitle.text = getString(R.string.waypoint_dialog_title, waypointIndex + 1)
 
         typeSpinner = view.findViewById(R.id.waypoint_type_spinner)
-        ArrayAdapter.createFromResource(
-            requireContext(), R.array.waypoint_types, R.layout.list_item
-        ).also { adapter ->
-            typeSpinner.setAdapter(adapter)
-            typeSpinner.onItemClickListener = this
-        }
-
+        waypointTypeListAdapter = WaypointTypeListAdapter(requireContext(), R.layout.list_item)
+        typeSpinner.setAdapter(waypointTypeListAdapter)
+        typeSpinner.onItemClickListener = this
         restoreWaypointType()
-
         return view
     }
 
     private fun restoreWaypointType() {
-        val type = viewModel.waypoints[waypointIndex].getType()
-        typeSpinner.setText(typeSpinner.adapter.getItem(type - 1).toString(), false)
-        setWaypointType(type)
+        typeSpinner.setText(viewModel.waypoints[waypointIndex].getTypeString(), false)
+        setWaypointType(viewModel.waypoints[waypointIndex]::class)
     }
 
     override fun onClick(v: View) {
@@ -78,35 +74,37 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
     }
 
     override fun onItemClick(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-        setWaypointType(pos + 1)
+        setWaypointType(waypointTypeListAdapter.getItem(pos)!!.type)
     }
 
-    private fun setWaypointType(type: Int) {
+    private fun <T : Waypoint> setWaypointType(type: KClass<T>) {
         propertiesView.removeAllViews()
-        viewModel.waypoints[waypointIndex].setType(type)
+        viewModel.waypoints[waypointIndex] = viewModel.waypoints[waypointIndex].convertTo(type)
+        viewModel.waypoints[waypointIndex].updateMarker()
+
         when (type) {
-            Waypoint.TYPE_WAYPOINT -> {
+            WaypointTypeNormal::class -> {
                 layoutInflater.inflate(R.layout.waypoint_type_wp, propertiesView)
             }
-            Waypoint.TYPE_POSHOLD_UNLIM -> {
+            WaypointTypePosholdUnlim::class -> {
                 layoutInflater.inflate(R.layout.waypoint_type_poshold_unlim, propertiesView)
             }
-            Waypoint.TYPE_POSHOLD_TIME -> {
+            WaypointTypePosholdTime::class -> {
                 layoutInflater.inflate(R.layout.waypoint_type_poshold_time, propertiesView)
             }
-            Waypoint.TYPE_RTH -> {
+            WaypointTypeRth::class -> {
                 layoutInflater.inflate(R.layout.waypoint_type_rth, propertiesView)
             }
-            Waypoint.TYPE_SET_POI -> {
+            WaypointTypeSetPoi::class -> {
 
             }
-            Waypoint.TYPE_JUMP -> {
+            WaypointTypeJump::class -> {
                 layoutInflater.inflate(R.layout.waypoint_type_jump, propertiesView)
             }
-            Waypoint.TYPE_SET_HEAD -> {
+            WaypointTypeSetHead::class -> {
                 layoutInflater.inflate(R.layout.waypoint_type_set_head, propertiesView)
             }
-            Waypoint.TYPE_LAND -> {
+            WaypointTypeLand::class -> {
                 layoutInflater.inflate(R.layout.waypoint_type_land, propertiesView)
             }
         }

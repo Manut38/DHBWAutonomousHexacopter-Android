@@ -16,10 +16,12 @@ import com.ernestoyaquello.dragdropswiperecyclerview.listener.OnItemDragListener
 import com.ernestoyaquello.dragdropswiperecyclerview.listener.OnItemSwipeListener
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import net.gyroinc.dhbwhexacopter.R
-import net.gyroinc.dhbwhexacopter.WaypointListAdapter
+import net.gyroinc.dhbwhexacopter.adapters.WaypointListAdapter
 import net.gyroinc.dhbwhexacopter.activities.MissionPlannerActivity
 import net.gyroinc.dhbwhexacopter.models.MainViewModel
 import net.gyroinc.dhbwhexacopter.models.Waypoint
+import net.gyroinc.dhbwhexacopter.models.WaypointTypeJump
+import net.gyroinc.dhbwhexacopter.models.WaypointTypeRth
 
 class WaypointListFragment : BottomSheetDialogFragment() {
 
@@ -29,7 +31,6 @@ class WaypointListFragment : BottomSheetDialogFragment() {
     private lateinit var buttonClear: ImageView
     private lateinit var buttonAddRth: ImageView
     private lateinit var buttonAddJump: ImageView
-    private lateinit var textViewNoWaypoints: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -124,25 +125,17 @@ class WaypointListFragment : BottomSheetDialogFragment() {
         buttonAddRth = view.findViewById(R.id.button_add_rth)
         buttonAddRth.setOnClickListener {
             (activity)
-            val wp = (activity as MissionPlannerActivity).addWaypoint(Waypoint.TYPE_RTH)
+            val wp = (activity as MissionPlannerActivity).addWaypoint(WaypointTypeRth::class)
             waypointListAdapter.addItem(wp)
             waypointList.smoothScrollToPosition(waypointListAdapter.itemCount - 1)
         }
 
         buttonAddJump = view.findViewById(R.id.button_add_jump)
         buttonAddJump.setOnClickListener {
-            val wp = (activity as MissionPlannerActivity).addWaypoint(Waypoint.TYPE_JUMP)
+            val wp = (activity as MissionPlannerActivity).addWaypoint(WaypointTypeJump::class)
             waypointListAdapter.addItem(wp)
             waypointList.smoothScrollToPosition(waypointListAdapter.itemCount - 1)
         }
-
-//        textViewNoWaypoints = view.findViewById(R.id.no_waypoints)
-//
-//        viewModel.waypoints.addOnListChangedCallback().observe(this, { waypoints ->
-//            textViewNoWaypoints.visibility =
-//                if (waypoints.isNotEmpty()) View.GONE else View.VISIBLE
-//        })
-
         return view
     }
 

@@ -1,10 +1,12 @@
-package net.gyroinc.dhbwhexacopter
+package net.gyroinc.dhbwhexacopter.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeAdapter
+import net.gyroinc.dhbwhexacopter.BR
+import net.gyroinc.dhbwhexacopter.R
 import net.gyroinc.dhbwhexacopter.databinding.WaypointListItemBinding
 import net.gyroinc.dhbwhexacopter.models.Waypoint
 

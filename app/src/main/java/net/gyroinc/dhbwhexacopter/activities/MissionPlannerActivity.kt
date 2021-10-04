@@ -40,6 +40,7 @@ import net.gyroinc.dhbwhexacopter.fragments.WaypointPropertiesFragment
 import net.gyroinc.dhbwhexacopter.models.*
 import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttToken
+import kotlin.reflect.KClass
 
 class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
     OnMyLocationButtonClickListener, OnMapReadyCallback,
@@ -385,23 +386,27 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
     }
 
     override fun onMapLongClick(latlng: LatLng) {
-        addWaypoint(Waypoint.TYPE_WAYPOINT, latlng)
+        addWaypoint(WaypointTypeNormal::class, latlng)
     }
 
-    fun addWaypoint(type: Int, position: LatLng): Waypoint {
+    private fun <T : Waypoint> addWaypoint(type: KClass<T>, position: LatLng): Waypoint {
         val waypointMarker = map.addMarker(
             MarkerOptions()
                 .position(position)
                 .draggable(true)
         )
         waypointMarker?.showInfoWindow()
-        val waypoint = Waypoint(type, viewModel.waypoints.size + 1, position, waypointMarker!!)
+        val waypoint: T = Waypoint.getInstanceOf(
+            type, viewModel.waypoints.size + 1,
+            position,
+            waypointMarker!!
+        )
         viewModel.waypoints.add(waypoint)
         updatePolylines()
         return waypoint
     }
 
-    fun addWaypoint(type: Int): Waypoint {
+    fun <T : Waypoint> addWaypoint(type: KClass<T>): Waypoint {
         return if (::currentLocation.isInitialized) {
             addWaypoint(type, LatLng(currentLocation.latitude, currentLocation.longitude))
         } else {
@@ -418,7 +423,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         if (!this::jumpPolylines.isInitialized) jumpPolylines = ArrayList()
         var visibleJumpCount = 0
         viewModel.waypoints.forEachIndexed { i, waypoint ->
-            if (waypoint.getType() == Waypoint.TYPE_JUMP &&
+            if (waypoint is WaypointTypeJump &&
                 i >= 2 &&
                 viewModel.waypoints.size >= waypoint.jumpTarget &&
                 viewModel.waypoints[i - 1].isJumpable() &&
@@ -456,12 +461,13 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         )
         routePolyline.points = viewModel.waypoints.mapNotNull { waypoint ->
             waypoint.marker.position.takeIf {
-                listOf(
-                    Waypoint.TYPE_WAYPOINT,
-                    Waypoint.TYPE_POSHOLD_TIME,
-                    Waypoint.TYPE_POSHOLD_UNLIM,
-                    Waypoint.TYPE_LAND
-                ).contains(waypoint.getType())
+                when (waypoint) {
+                    is WaypointTypeNormal,
+                    is WaypointTypePosholdTime,
+                    is WaypointTypePosholdUnlim,
+                    is WaypointTypeLand -> true
+                    else -> false
+                }
             }
         }
     }
@@ -494,7 +500,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         viewModel.waypoints[waypointIndex].marker.remove()
         viewModel.waypoints.removeAt(waypointIndex)
         for (i in waypointIndex until viewModel.waypoints.size) {
-            viewModel.waypoints[i].setWPNumber(i + 1)
+            viewModel.waypoints[i].setInfoWindowWPNumber(i + 1)
         }
         updatePolylines()
     }
@@ -512,7 +518,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         viewModel.waypoints.removeAt(prevIndex)
         viewModel.waypoints.add(newIndex, waypoint)
         for (i in 0 until viewModel.waypoints.size) {
-            viewModel.waypoints[i].setWPNumber(i + 1)
+            viewModel.waypoints[i].setInfoWindowWPNumber(i + 1)
         }
         updatePolylines()
     }
@@ -559,14 +565,6 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
 
     private fun getStatusBarHeight(): Int {
         val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        return if (resourceId > 0) {
-            resources.getDimensionPixelSize(resourceId)
-        } else 0
-    }
-
-
-    private fun getNavigationBarHeight(): Int {
-        val resourceId: Int = resources.getIdentifier("navigation_bar_height", "dimen", "android")
         return if (resourceId > 0) {
             resources.getDimensionPixelSize(resourceId)
         } else 0

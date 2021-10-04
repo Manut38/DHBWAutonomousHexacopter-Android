@@ -8,6 +8,22 @@
         <variable
             name="waypoint"
             type="net.gyroinc.dhbwhexacopter.models.Waypoint" />
+
+        <import type="net.gyroinc.dhbwhexacopter.models.WaypointTypeNormal" />
+
+        <import type="net.gyroinc.dhbwhexacopter.models.WaypointTypePosholdUnlim" />
+
+        <import type="net.gyroinc.dhbwhexacopter.models.WaypointTypePosholdTime" />
+
+        <import type="net.gyroinc.dhbwhexacopter.models.WaypointTypeRth" />
+
+        <import type="net.gyroinc.dhbwhexacopter.models.WaypointTypeJump" />
+
+        <import type="net.gyroinc.dhbwhexacopter.models.WaypointTypeSetHead" />
+
+        <import type="net.gyroinc.dhbwhexacopter.models.WaypointTypeSetPoi" />
+
+        <import type="net.gyroinc.dhbwhexacopter.models.WaypointTypeLand" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -47,7 +63,7 @@
                     android:id="@+id/waypoint_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@stringArray/waypoint_types[waypoint.type - 1]}"
+                    android:text="@{waypoint.typeString}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/waypoint_title"
                     tools:text="TYPE" />
@@ -84,7 +100,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@{@string/waypoint_list_wait_time(waypoint.waitTime)}"
-                    app:goneUnless="@{waypoint.type == waypoint.TYPE_POSHOLD_TIME}"
+                    app:goneUnless="@{waypoint instanceof WaypointTypePosholdTime}"
                     app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
                     app:layout_constraintTop_toBottomOf="@+id/waypoint_item_speed"
                     tools:text="@string/waypoint_list_wait_time" />
@@ -94,7 +110,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text='@{@string/waypoint_list_rth_land(waypoint.rthLand ? "yes": "no")}'
-                    app:goneUnless="@{waypoint.type == waypoint.TYPE_RTH}"
+                    app:goneUnless="@{waypoint instanceof WaypointTypeRth}"
                     app:layout_constraintStart_toEndOf="@id/waypoint_item_guide"
                     app:layout_constraintTop_toBottomOf="@+id/waypoint_item_wait_time"
                     tools:text="@string/waypoint_list_rth_land" />
@@ -104,7 +120,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text='@{@string/waypoint_list_jump_target(waypoint.jumpTarget)}'
-                    app:goneUnless="@{waypoint.type == waypoint.TYPE_JUMP}"
+                    app:goneUnless="@{waypoint instanceof WaypointTypeJump}"
                     app:layout_constraintStart_toEndOf="@id/waypoint_item_guide"
                     app:layout_constraintTop_toBottomOf="@+id/waypoint_item_rth_land"
                     tools:text="@string/waypoint_list_jump_target" />
@@ -114,7 +130,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text='@{@string/waypoint_list_jump_repeat(waypoint.jumpRepeat)}'
-                    app:goneUnless="@{waypoint.type == waypoint.TYPE_JUMP}"
+                    app:goneUnless="@{waypoint instanceof WaypointTypeJump}"
                     app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
                     app:layout_constraintTop_toBottomOf="@+id/waypoint_item_jump_target"
                     tools:text="@string/waypoint_list_jump_repeat" />
@@ -124,7 +140,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text='@{@string/waypoint_list_heading(waypoint.heading)}'
-                    app:goneUnless="@{waypoint.type == waypoint.TYPE_SET_HEAD &amp;&amp; !waypoint.headingReset}"
+                    app:goneUnless="@{waypoint instanceof WaypointTypeSetHead &amp;&amp; !waypoint.headingReset}"
                     app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
                     app:layout_constraintTop_toBottomOf="@+id/waypoint_item_jump_repeat"
                     tools:text="@string/waypoint_list_heading" />
@@ -134,7 +150,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text='@{@string/waypoint_list_heading_reset(waypoint.headingReset ? "yes": "no")}'
-                    app:goneUnless="@{waypoint.type == waypoint.TYPE_SET_HEAD}"
+                    app:goneUnless="@{waypoint instanceof WaypointTypeSetHead}"
                     app:layout_constraintStart_toEndOf="@id/waypoint_item_guide"
                     app:layout_constraintTop_toBottomOf="@+id/waypoint_item_heading"
                     tools:text="@string/waypoint_list_heading_reset" />
@@ -144,7 +160,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text='@{@string/waypoint_list_elevation_adjustment(waypoint.elevationAdjustment)}'
-                    app:goneUnless="@{waypoint.type == waypoint.TYPE_LAND}"
+                    app:goneUnless="@{waypoint instanceof WaypointTypeLand}"
                     app:layout_constraintStart_toEndOf="@+id/waypoint_item_guide"
                     app:layout_constraintTop_toBottomOf="@+id/waypoint_item_heading_reset"
                     tools:text='@string/waypoint_list_elevation_adjustment' />
