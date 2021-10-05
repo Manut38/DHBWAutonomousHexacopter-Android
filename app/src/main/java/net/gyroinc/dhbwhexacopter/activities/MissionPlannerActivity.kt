@@ -354,7 +354,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         ) {
             map.isMyLocationEnabled = true
             locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 400, 1000f, this)
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 400, 0f, this)
         } else {
             // Permission to access the location is missing. Show rationale and request permission
             ActivityCompat.requestPermissions(
@@ -374,8 +374,6 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         }
 
         currentLocation = location
-
-//        locationManager.removeUpdates(this)
     }
 
     override fun onMyLocationButtonClick(): Boolean {

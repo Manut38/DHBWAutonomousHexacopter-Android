@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
@@ -59,7 +58,7 @@ class WaypointListFragment : BottomSheetDialogFragment() {
                 }
                 dialog.onDismissListener =
                     DialogInterface.OnDismissListener {
-                        waypointListAdapter.notifyDataSetChanged()
+                        waypointListAdapter.dataSet = viewModel.waypoints
                     }
             }
             dialog.show(
