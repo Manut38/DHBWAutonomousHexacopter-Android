@@ -1,13 +1,7 @@
 package net.gyroinc.dhbwhexacopter.activities
 
-import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -18,43 +12,29 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.GoogleMap.*
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import net.gyroinc.dhbwhexacopter.*
 import net.gyroinc.dhbwhexacopter.fragments.LedControlFragment
+import net.gyroinc.dhbwhexacopter.fragments.MissionPlannerMap
 import net.gyroinc.dhbwhexacopter.fragments.WaypointListFragment
-import net.gyroinc.dhbwhexacopter.fragments.WaypointPropertiesFragment
 import net.gyroinc.dhbwhexacopter.models.*
 import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttToken
 import kotlin.reflect.KClass
 
-class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
-    OnMyLocationButtonClickListener, OnMapReadyCallback,
-    OnRequestPermissionsResultCallback, LocationListener, OnInfoWindowClickListener,
-    OnMapLongClickListener, OnMarkerDragListener {
+class MissionPlannerActivity : AppCompatActivity() {
 
-    private var gpsFix: Boolean = false
-    private var permissionDenied = false
-    private lateinit var currentLocation: Location
-    private lateinit var map: GoogleMap
-    private lateinit var locationManager: LocationManager
+    lateinit var missionPlannerMap: MissionPlannerMap
     var mqttConnection: MQTTConnection = MQTTConnection(this)
-    private lateinit var routePolyline: Polyline
-    private lateinit var jumpPolylines: ArrayList<Polyline>
     private lateinit var viewModel: MainViewModel
     private lateinit var fab: FloatingActionButton
     private lateinit var mainLayout: CoordinatorLayout
@@ -72,6 +52,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
     private lateinit var gpsStatusAltitudeTextView: TextView
     private lateinit var bottomAppBar: BottomAppBar
     private lateinit var prefs: SharedPreferences
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,9 +82,19 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         setSupportActionBar(bottomAppBar)
 
         //Initialize Map
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        missionPlannerMap = MissionPlannerMap(this, R.id.map, viewModel.waypoints)
+        missionPlannerMap.setOnMapLongClickListener { latLng ->
+            addWaypoint(WaypointTypeNormal::class, latLng)
+        }
+        bottomAppBar.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        missionPlannerMap.setOnMapReadyCallback { googleMap ->
+            googleMap.setPadding(
+                0,
+                getStatusBarHeight(),
+                0,
+                bottomAppBar.measuredHeight
+            )
+        }
 
         //Button Actions
         fab.setOnClickListener {
@@ -300,95 +291,8 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         }
     }
 
-    override fun onMapReady(googleMap: GoogleMap?) {
-        map = googleMap ?: return
-        map.setOnMyLocationClickListener(this)
-        bottomAppBar.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        val paddingBottom = bottomAppBar.measuredHeight
-        Log.d(TAG, paddingBottom.toString())
-
-        map.setPadding(
-            0,
-            getStatusBarHeight(),
-            0,
-            paddingBottom
-        )
-
-        map.isBuildingsEnabled = false
-        map.isIndoorEnabled = false
-        map.mapType = MAP_TYPE_SATELLITE
-        map.uiSettings.isIndoorLevelPickerEnabled = false
-        map.uiSettings.isCompassEnabled = true
-        map.uiSettings.isMyLocationButtonEnabled = true
-        map.uiSettings.isZoomControlsEnabled = false
-        map.uiSettings.isTiltGesturesEnabled = false
-        map.uiSettings.isMapToolbarEnabled = false
-        map.setOnMapLongClickListener(this)
-        map.setOnMarkerDragListener(this)
-        map.setOnInfoWindowClickListener(this)
-        map.moveCamera(
-            CameraUpdateFactory.newLatLngZoom(
-                LatLng(
-                    49.02657630563075,
-                    8.385215954229373
-                ), 15f
-            )
-        )
-        enableMyLocation()
-
-        dronePositionMarker = map.addMarker(
-            MarkerOptions().visible(false).position(LatLng(0.0, 0.0)).zIndex(100f)
-                .anchor(0.5f, 0.5f)
-        )!!
-        dronePositionMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_drone_marker))
-    }
-
-    /**
-     * Enables the My Location layer if the fine location permission has been granted.
-     */
-    private fun enableMyLocation() {
-        if (!::map.isInitialized) return
-        // [START maps_check_location_permission]
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
-            map.isMyLocationEnabled = true
-            locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 400, 0f, this)
-        } else {
-            // Permission to access the location is missing. Show rationale and request permission
-            ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE
-            )
-        }
-        // [END maps_check_location_permission]
-    }
-
-    override fun onLocationChanged(location: Location) {
-        if (!gpsFix) {
-            gpsFix = true
-            val latLng = LatLng(location.latitude, location.longitude)
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
-            map.moveCamera(cameraUpdate)
-        }
-
-        currentLocation = location
-    }
-
-    override fun onMyLocationButtonClick(): Boolean {
-        return false
-    }
-
-    override fun onMyLocationClick(location: Location) {
-    }
-
-    override fun onMapLongClick(latlng: LatLng) {
-        addWaypoint(WaypointTypeNormal::class, latlng)
-    }
-
     private fun <T : Waypoint> addWaypoint(type: KClass<T>, position: LatLng): Waypoint {
-        val waypointMarker = map.addMarker(
+        val waypointMarker = missionPlannerMap.addMarker(
             MarkerOptions()
                 .position(position)
                 .draggable(true)
@@ -400,98 +304,15 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
             waypointMarker!!
         )
         viewModel.waypoints.add(waypoint)
-        updatePolylines()
+        missionPlannerMap.updatePolylines()
         return waypoint
     }
 
     fun <T : Waypoint> addWaypoint(type: KClass<T>): Waypoint {
-        return if (::currentLocation.isInitialized) {
-            addWaypoint(type, LatLng(currentLocation.latitude, currentLocation.longitude))
-        } else {
-            addWaypoint(type, LatLng(0.0, 0.0))
+        missionPlannerMap.getCurrentLocation()?.let { location ->
+            return addWaypoint(type, LatLng(location.latitude, location.longitude))
         }
-    }
-
-    fun updatePolylines() {
-        drawRoutePolyline()
-        drawJumpPolylines()
-    }
-
-    private fun drawJumpPolylines() {
-        if (!this::jumpPolylines.isInitialized) jumpPolylines = ArrayList()
-        var visibleJumpCount = 0
-        viewModel.waypoints.forEachIndexed { i, waypoint ->
-            if (waypoint is WaypointTypeJump &&
-                i >= 2 &&
-                viewModel.waypoints.size >= waypoint.jumpTarget &&
-                viewModel.waypoints[i - 1].isJumpable() &&
-                viewModel.waypoints[waypoint.jumpTarget - 1].isJumpable()
-            ) {
-                val startPos = viewModel.waypoints[i - 1].marker.position
-                val endPos = viewModel.waypoints[waypoint.jumpTarget - 1].marker.position
-
-                if (jumpPolylines.size <= visibleJumpCount) {
-                    val line = map.addPolyline(
-                        PolylineOptions()
-                            .color(getColor(R.color.jump))
-                            .pattern(listOf(Dash(20f), Gap(10f)))
-                            .add(startPos)
-                            .add(endPos)
-                    )
-                    jumpPolylines.add(line)
-                } else {
-                    jumpPolylines[visibleJumpCount].points = listOf(startPos, endPos)
-                }
-                visibleJumpCount += 1
-            }
-        }
-
-        for (i in visibleJumpCount until jumpPolylines.size) {
-            jumpPolylines[i].remove()
-            jumpPolylines.removeAt(i)
-        }
-    }
-
-    private fun drawRoutePolyline() {
-        if (!this::routePolyline.isInitialized) routePolyline = map.addPolyline(
-            PolylineOptions()
-                .color(getColor(R.color.route))
-        )
-        routePolyline.points = viewModel.waypoints.mapNotNull { waypoint ->
-            waypoint.marker.position.takeIf {
-                when (waypoint) {
-                    is WaypointTypeNormal,
-                    is WaypointTypePosholdTime,
-                    is WaypointTypePosholdUnlim,
-                    is WaypointTypeLand -> true
-                    else -> false
-                }
-            }
-        }
-    }
-
-    override fun onInfoWindowClick(waypointMarker: Marker) {
-        val dialog = WaypointPropertiesFragment().also { dialog ->
-            dialog.arguments = Bundle().also { bundle ->
-                bundle.putInt(
-                    "waypointIndex",
-                    waypointMarker.tag as Int
-                )
-            }
-        }
-        dialog.show(supportFragmentManager, WaypointPropertiesFragment.TAG)
-    }
-
-    override fun onMarkerDragStart(p0: Marker?) {
-        updatePolylines()
-    }
-
-    override fun onMarkerDrag(p0: Marker?) {
-        updatePolylines()
-    }
-
-    override fun onMarkerDragEnd(marker: Marker) {
-        updatePolylines()
+        return addWaypoint(type, LatLng(0.0, 0.0))
     }
 
     fun onWaypointRemoved(waypointIndex: Int) {
@@ -500,7 +321,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         for (i in waypointIndex until viewModel.waypoints.size) {
             viewModel.waypoints[i].setInfoWindowWPNumber(i + 1)
         }
-        updatePolylines()
+        missionPlannerMap.updatePolylines()
     }
 
     fun onWaypointsCleared() {
@@ -508,7 +329,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
             it.marker.remove()
         }
         viewModel.waypoints.clear()
-        updatePolylines()
+        missionPlannerMap.updatePolylines()
     }
 
     fun onWaypointIndexChanged(prevIndex: Int, newIndex: Int) {
@@ -518,47 +339,12 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         for (i in 0 until viewModel.waypoints.size) {
             viewModel.waypoints[i].setInfoWindowWPNumber(i + 1)
         }
-        updatePolylines()
+        missionPlannerMap.updatePolylines()
     }
 
     fun focusOnWaypoint(waypoint: Waypoint) {
         waypoint.marker.showInfoWindow()
-        map.animateCamera(CameraUpdateFactory.newLatLng(waypoint.marker.position))
-    }
-
-    // [START maps_check_location_permission_result]
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
-            return
-        }
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            // Enable the my location layer if the permission has been granted.
-            enableMyLocation()
-        } else {
-            // Permission was denied. Display an error message
-            // [START_EXCLUDE]
-            // Display the missing permission error dialog when the fragments resume.
-            permissionDenied = true
-            // [END_EXCLUDE]
-        }
-    }
-
-    // [END maps_check_location_permission_result]
-    override fun onResumeFragments() {
-        super.onResumeFragments()
-        if (permissionDenied) {
-            // Permission was not granted, display error dialog.
-            //showMissingPermissionError()
-            permissionDenied = false
-        }
+        missionPlannerMap.animateCamera(CameraUpdateFactory.newLatLng(waypoint.marker.position))
     }
 
     private fun getStatusBarHeight(): Int {
@@ -573,15 +359,7 @@ class MissionPlannerActivity : AppCompatActivity(), OnMyLocationClickListener,
         snack.show()
     }
 
-
     companion object {
-        /**
-         * Request code for location permission request.
-         *
-         * @see .onRequestPermissionsResult
-         */
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
-
         const val TAG = "MissionPlannerActivity"
 
         private const val DISCONNECTED = 0

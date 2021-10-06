@@ -109,7 +109,7 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
             }
         }
 
-        (activity as MissionPlannerActivity).updatePolylines()
+        (activity as MissionPlannerActivity).missionPlannerMap.updatePolylines()
 
         val altitude: EditText? = propertiesView.findViewById(R.id.waypoint_altitude)
         altitude?.filters = arrayOf(InputFilterMinMax(1f, 40f))
@@ -140,7 +140,7 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
         jumpTarget?.doOnTextChanged { text, _, _, _ ->
             if (!text.isNullOrEmpty()) {
                 viewModel.waypoints[waypointIndex].jumpTarget = text.toString().toInt()
-                (activity as MissionPlannerActivity).updatePolylines()
+                (activity as MissionPlannerActivity).missionPlannerMap.updatePolylines()
             }
         }
 
