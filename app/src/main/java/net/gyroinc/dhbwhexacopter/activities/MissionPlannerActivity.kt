@@ -57,31 +57,43 @@ class MissionPlannerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mission_planner)
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
-
-        //Bind View Model
+        initializeSharedPreferences()
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-
-        //Bind Views
-        mainLayout = findViewById(R.id.mainLayout)
-        fab = findViewById(R.id.fab)
-        navStatusNavStateTextView = findViewById(R.id.nav_status_nav_state)
-        navStatusGpsModeTextView = findViewById(R.id.nav_status_gps_mode)
-        navStatusWpNumberTextView = findViewById(R.id.nav_status_wp_number)
-        gpsStatusSpeedTextView = findViewById(R.id.gps_status_speed)
-        gpsStatusNumSatTextView = findViewById(R.id.nav_status_satellites)
-        gpsStatusFixTextView = findViewById(R.id.nav_status_gps_fix)
-        gpsStatusAltitudeTextView = findViewById(R.id.nav_status_altitude)
-        navStatusCard = findViewById(R.id.nav_status_card)
-        errorStatusCard = findViewById(R.id.error_status_card)
-        bottomAppBar = findViewById(R.id.bottom_app_bar)
-        errorStatusTextView = findViewById(R.id.error_status_text)
-
-        //AppBar
+        bindViews()
         setSupportActionBar(bottomAppBar)
+        initializeMap()
+        setupButtonActions()
+        adjustMargins()
+    }
 
-        //Initialize Map
+    private fun initializeSharedPreferences() {
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        prefs.edit().putInt("ledControlBrightness", 0).apply()
+    }
+
+    private fun adjustMargins() {
+        val params = errorStatusCard.layoutParams as ViewGroup.MarginLayoutParams
+        params.topMargin =
+            getStatusBarHeight() + resources.getDimensionPixelSize(R.dimen.error_status_card_margin_top)
+        errorStatusCard.layoutParams = params
+    }
+
+    private fun setupButtonActions() {
+        fab.setOnClickListener {
+            if (!mqttConnection.isConnected()) {
+                connectMQTT()
+            } else {
+                if (droneStatus.online) {
+                    showStatusSnackBar("Sending Waypoints to Drone...", Snackbar.LENGTH_LONG)
+                    mqttConnection.publishWaypoints(viewModel.waypoints)
+                } else {
+                    disconnectMQTT()
+                }
+            }
+        }
+    }
+
+    private fun initializeMap() {
         missionPlannerMap = MissionPlannerMap(this, R.id.map, viewModel.waypoints)
         missionPlannerMap.setOnMapLongClickListener { latLng ->
             addWaypoint(WaypointTypeNormal::class, latLng)
@@ -95,29 +107,22 @@ class MissionPlannerActivity : AppCompatActivity() {
                 bottomAppBar.measuredHeight
             )
         }
+    }
 
-        //Button Actions
-        fab.setOnClickListener {
-            if (!mqttConnection.isConnected()) {
-                connectMQTT()
-            } else {
-                if (droneStatus.online) {
-                    showStatusSnackBar("Sending Waypoints to Drone...", Snackbar.LENGTH_LONG)
-                    mqttConnection.publishWaypoints(viewModel.waypoints)
-                } else {
-                    disconnectMQTT()
-                }
-            }
-        }
-
-        //Reset LED  Brightness SeekBar
-        prefs.edit().putInt("ledControlBrightness", 0).apply()
-
-        //Adjust Error Status Margin
-        val params = errorStatusCard.layoutParams as ViewGroup.MarginLayoutParams
-        params.topMargin =
-            getStatusBarHeight() + resources.getDimensionPixelSize(R.dimen.error_status_card_margin_top)
-        errorStatusCard.layoutParams = params
+    private fun bindViews() {
+        mainLayout = findViewById(R.id.mainLayout)
+        fab = findViewById(R.id.fab)
+        navStatusNavStateTextView = findViewById(R.id.nav_status_nav_state)
+        navStatusGpsModeTextView = findViewById(R.id.nav_status_gps_mode)
+        navStatusWpNumberTextView = findViewById(R.id.nav_status_wp_number)
+        gpsStatusSpeedTextView = findViewById(R.id.gps_status_speed)
+        gpsStatusNumSatTextView = findViewById(R.id.nav_status_satellites)
+        gpsStatusFixTextView = findViewById(R.id.nav_status_gps_fix)
+        gpsStatusAltitudeTextView = findViewById(R.id.nav_status_altitude)
+        navStatusCard = findViewById(R.id.nav_status_card)
+        errorStatusCard = findViewById(R.id.error_status_card)
+        bottomAppBar = findViewById(R.id.bottom_app_bar)
+        errorStatusTextView = findViewById(R.id.error_status_text)
     }
 
     private fun disconnectMQTT() {
