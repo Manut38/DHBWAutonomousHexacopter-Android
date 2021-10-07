@@ -16,7 +16,7 @@ class WaypointTypeSetPoi(wpNum: Int, latLng: LatLng, marker: Marker) :
     }
 
     override fun getTypeString(): String {
-        return "SET_POI"
+        return Companion.getTypeString()
     }
 
     override fun isJumpable(): Boolean {
@@ -41,5 +41,11 @@ class WaypointTypeSetPoi(wpNum: Int, latLng: LatLng, marker: Marker) :
 
     override fun getP2(): Int {
         return 0
+    }
+
+    companion object {
+        fun getTypeString(): String {
+            return "SET_POI"
+        }
     }
 }

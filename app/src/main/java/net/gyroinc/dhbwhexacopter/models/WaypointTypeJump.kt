@@ -16,7 +16,7 @@ class WaypointTypeJump(wpNum: Int, latLng: LatLng, marker: Marker) :
     }
 
     override fun getTypeString(): String {
-        return "JUMP"
+        return Companion.getTypeString()
     }
 
     override fun isJumpable(): Boolean {
@@ -41,5 +41,11 @@ class WaypointTypeJump(wpNum: Int, latLng: LatLng, marker: Marker) :
 
     override fun getP2(): Int {
         return jumpRepeat
+    }
+
+    companion object {
+        fun getTypeString(): String {
+            return "JUMP"
+        }
     }
 }

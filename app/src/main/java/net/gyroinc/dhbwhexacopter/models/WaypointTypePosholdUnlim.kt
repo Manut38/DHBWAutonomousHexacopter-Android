@@ -16,7 +16,7 @@ class WaypointTypePosholdUnlim(wpNum: Int, latLng: LatLng, marker: Marker) :
     }
 
     override fun getTypeString(): String {
-        return "POSHOLD_UNLIM"
+        return Companion.getTypeString()
     }
 
     override fun isJumpable(): Boolean {
@@ -41,5 +41,11 @@ class WaypointTypePosholdUnlim(wpNum: Int, latLng: LatLng, marker: Marker) :
 
     override fun getP2(): Int {
         return getSpeedInCm()
+    }
+
+    companion object {
+        fun getTypeString(): String {
+            return "POSHOLD_UNLIM"
+        }
     }
 }
