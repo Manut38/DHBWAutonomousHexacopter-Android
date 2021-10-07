@@ -20,8 +20,6 @@ import net.gyroinc.dhbwhexacopter.models.MainViewModel
 
 
 class LedControlFragment : BottomSheetDialogFragment() {
-
-    private val viewModel: MainViewModel by activityViewModels()
     private lateinit var prefs: SharedPreferences
     private lateinit var ledPowerButton: ImageView
     private lateinit var colorPreviewView: ImageView
@@ -34,26 +32,31 @@ class LedControlFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         val view = inflater.inflate(R.layout.led_control_fragment, container, false)
-        view.findViewById<ImageView>(R.id.close_button).setOnClickListener { dismiss() }
+        prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        bindViews(view)
+        setupColorpicker()
+        setupButtonActions(view)
+        setupBrightnessSeekBar()
+        setPickedColor(prefs.getInt("ledControlColor", requireContext().getColor(R.color.red)))
+        return view
+    }
 
-        colorPreviewView = view.findViewById(R.id.color_preview_view)
-        brightnessSeekBar = view.findViewById(R.id.brightness_seek_bar)
+    private fun setupBrightnessSeekBar() {
+        brightnessSeekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
 
-        colorPicker = view.findViewById(R.id.led_control_color_picker)
-        colorPicker.setColorSelectionListener(object : SimpleColorSelectionListener() {
-            override fun onColorSelected(color: Int) {
-                colorPreviewView.background.setTint(color)
-            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
-            override fun onColorSelectionEnd(color: Int) {
-                setPickedColor(color)
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                prefs.edit().putInt("ledControlBrightness", seekBar.progress).apply()
                 publishColor()
             }
         })
+        brightnessSeekBar.progress = prefs.getInt("ledControlBrightness", 0)
+    }
 
-        ledPowerButton = view.findViewById(R.id.button_led_power)
+    private fun setupButtonActions(view: View) {
         ledPowerButton.setOnClickListener {
             if (brightnessSeekBar.progress == 0) {
                 brightnessSeekBar.progress = 200
@@ -64,17 +67,7 @@ class LedControlFragment : BottomSheetDialogFragment() {
             publishColor()
         }
 
-        brightnessSeekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
-
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                prefs.edit().putInt("ledControlBrightness", seekBar.progress).apply()
-                publishColor()
-            }
-
-        })
+        view.findViewById<ImageView>(R.id.close_button).setOnClickListener { dismiss() }
 
         val onPresetClick =
             View.OnClickListener {
@@ -85,11 +78,26 @@ class LedControlFragment : BottomSheetDialogFragment() {
         view.findViewById<ImageView>(R.id.color_preset_red).setOnClickListener(onPresetClick)
         view.findViewById<ImageView>(R.id.color_preset_green).setOnClickListener(onPresetClick)
         view.findViewById<ImageView>(R.id.color_preset_blue).setOnClickListener(onPresetClick)
+    }
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-        setPickedColor(prefs.getInt("ledControlColor", requireContext().getColor(R.color.red)))
-        brightnessSeekBar.progress = prefs.getInt("ledControlBrightness", 0)
-        return view
+    private fun setupColorpicker() {
+        colorPicker.setColorSelectionListener(object : SimpleColorSelectionListener() {
+            override fun onColorSelected(color: Int) {
+                colorPreviewView.background.setTint(color)
+            }
+
+            override fun onColorSelectionEnd(color: Int) {
+                setPickedColor(color)
+                publishColor()
+            }
+        })
+    }
+
+    private fun bindViews(view: View) {
+        colorPreviewView = view.findViewById(R.id.color_preview_view)
+        brightnessSeekBar = view.findViewById(R.id.brightness_seek_bar)
+        colorPicker = view.findViewById(R.id.led_control_color_picker)
+        ledPowerButton = view.findViewById(R.id.button_led_power)
     }
 
     private fun setPickedColor(color: Int) {

@@ -33,11 +33,27 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.waypoint_properties_fragment, container, false)
-
-        view.findViewById<ImageView>(R.id.close_button).setOnClickListener { dismiss() }
-
         waypointIndex = requireArguments().getInt("waypointIndex")
+        bindViews(view)
+        setupButtons(view)
+        setupTypeSpinner()
+        restoreWaypointType()
+        return view
+    }
+
+    private fun setupTypeSpinner() {
+        waypointTypeListAdapter = WaypointTypeListAdapter(requireContext(), R.layout.list_item)
+        typeSpinner.setAdapter(waypointTypeListAdapter)
+        typeSpinner.onItemClickListener = this
+    }
+
+    private fun bindViews(view: View) {
         propertiesView = view.findViewById(R.id.waypoint_properties)
+        typeSpinner = view.findViewById(R.id.waypoint_type_spinner)
+    }
+
+    private fun setupButtons(view: View) {
+        view.findViewById<ImageView>(R.id.close_button).setOnClickListener { dismiss() }
 
         val saveButton: Button = view.findViewById(R.id.waypoint_button_save)
         saveButton.setOnClickListener(this)
@@ -47,13 +63,6 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
 
         val waypointTitle: TextView = view.findViewById(R.id.waypoint_properties_title)
         waypointTitle.text = getString(R.string.waypoint_dialog_title, waypointIndex + 1)
-
-        typeSpinner = view.findViewById(R.id.waypoint_type_spinner)
-        waypointTypeListAdapter = WaypointTypeListAdapter(requireContext(), R.layout.list_item)
-        typeSpinner.setAdapter(waypointTypeListAdapter)
-        typeSpinner.onItemClickListener = this
-        restoreWaypointType()
-        return view
     }
 
     private fun restoreWaypointType() {
@@ -110,7 +119,10 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
         }
 
         (activity as MissionPlannerActivity).missionPlannerMap.updatePolylines()
+        setupPropertyFields()
+    }
 
+    private fun setupPropertyFields() {
         val altitude: EditText? = propertiesView.findViewById(R.id.waypoint_altitude)
         altitude?.filters = arrayOf(InputFilterMinMax(1f, 40f))
         altitude?.setText(viewModel.waypoints[waypointIndex].altitude.toString())
@@ -208,4 +220,3 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
         const val TAG = "WaypointDialogFragment"
     }
 }
-

@@ -62,8 +62,9 @@ class MissionPlannerActivity : AppCompatActivity() {
         bindViews()
         setSupportActionBar(bottomAppBar)
         initializeMap()
-        setupButtonActions()
         adjustMargins()
+        setupButtonActions()
+        setupMqttCallbacks()
     }
 
     private fun initializeSharedPreferences() {
@@ -130,12 +131,12 @@ class MissionPlannerActivity : AppCompatActivity() {
         val token = mqttConnection.disconnect()
         token.actionCallback = object : IMqttActionListener {
             override fun onSuccess(asyncActionToken: IMqttToken) {
-                mqttConnection.mqttClient.unregisterResources()
+                mqttConnection.unregisterResources()
                 showStatusSnackBar("Disconnected!", Snackbar.LENGTH_SHORT)
             }
 
             override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
-                mqttConnection.mqttClient.unregisterResources()
+                mqttConnection.unregisterResources()
             }
         }
         droneStatus = DroneStatus(false)
@@ -177,74 +178,12 @@ class MissionPlannerActivity : AppCompatActivity() {
 
     private fun connectMQTT() {
         showStatusSnackBar("Connecting...", Snackbar.LENGTH_SHORT)
-        mqttConnection = MQTTConnection(this)
         val token = mqttConnection.connect()
         token.actionCallback =
             object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken) {
                     setConnectionState(MQTT_CONNECTED)
                     showStatusSnackBar("MQTT Connected!", Snackbar.LENGTH_SHORT)
-
-                    mqttConnection.setMQTTStatusCallback(object : IMqttStatusCallback {
-                        override fun onConnectionLost() {
-                            setConnectionState(DISCONNECTED)
-
-                        }
-                    })
-
-                    mqttConnection.setDroneStatusCallback(object : IDroneStatusCallback {
-                        override fun onUpdateReceived(status: DroneStatus) {
-                            if (status.online) {
-                                setConnectionState(DRONE_ONLINE)
-                                showStatusSnackBar("Drone connected!", Snackbar.LENGTH_SHORT)
-                            } else {
-                                setConnectionState(MQTT_CONNECTED)
-                                if (droneStatus.online)
-                                    showStatusSnackBar(
-                                        "Drone disconnected!",
-                                        Snackbar.LENGTH_SHORT
-                                    )
-                            }
-                            droneStatus = status
-                        }
-                    })
-
-                    mqttConnection.setNavStatusCallback(object : INavStatusCallback {
-                        override fun onUpdateReceived(status: DroneNavStatus) {
-                            val gpsModeArray = resources.getStringArray(R.array.nav_status_gps_mode)
-                            navStatusGpsModeTextView.text =
-                                if (gpsModeArray.size > status.gps_mode) gpsModeArray[status.gps_mode] else "Invalid"
-                            val navStateArray =
-                                resources.getStringArray(R.array.nav_status_nav_state)
-                            navStatusNavStateTextView.text =
-                                if (navStateArray.size > status.nav_state) navStateArray[status.nav_state] else "Invalid"
-                            navStatusWpNumberTextView.text = status.wp_number.toString()
-                            val errorStateArray =
-                                resources.getStringArray(R.array.nav_status_error_description)
-                            errorStatusTextView.text =
-                                if (errorStateArray.size > status.nav_error) errorStateArray[status.nav_error] else "Invalid"
-                        }
-                    })
-
-                    mqttConnection.setGPSCallback(object : IGpsCallback {
-                        override fun onUpdateReceived(status: DroneGpsStatus) {
-                            if (::dronePositionMarker.isInitialized) {
-                                dronePositionMarker.position = status.getLatLng()
-                                if (droneStatus.online) dronePositionMarker.isVisible = true
-                            }
-                            val fixArray = resources.getStringArray(R.array.nav_status_gps_fix)
-                            gpsStatusFixTextView.text =
-                                if (fixArray.size > status.fix) fixArray[status.fix] else "Invalid"
-                            gpsStatusSpeedTextView.text = getString(
-                                R.string.gps_status_speed_value,
-                                (status.speed.toDouble() / 100)
-                            )
-                            gpsStatusNumSatTextView.text = status.numsat.toString()
-                            gpsStatusAltitudeTextView.text = getString(
-                                R.string.gps_status_altitude_value, status.alt
-                            )
-                        }
-                    })
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
@@ -254,9 +193,71 @@ class MissionPlannerActivity : AppCompatActivity() {
                     )
                     Log.e(MQTTConnection.TAG, "Failed to connect")
                     Log.e(MQTTConnection.TAG, exception.localizedMessage!!)
-                    mqttConnection.mqttClient.unregisterResources()
+                    mqttConnection.unregisterResources()
                 }
             }
+    }
+
+    private fun setupMqttCallbacks() {
+        mqttConnection.setMQTTStatusCallback(object : IMqttStatusCallback {
+            override fun onConnectionLost() {
+                setConnectionState(DISCONNECTED)
+            }
+        })
+
+        mqttConnection.setDroneStatusCallback(object : IDroneStatusCallback {
+            override fun onUpdateReceived(status: DroneStatus) {
+                if (status.online) {
+                    setConnectionState(DRONE_ONLINE)
+                    showStatusSnackBar("Drone connected!", Snackbar.LENGTH_SHORT)
+                } else {
+                    setConnectionState(MQTT_CONNECTED)
+                    if (droneStatus.online)
+                        showStatusSnackBar(
+                            "Drone disconnected!",
+                            Snackbar.LENGTH_SHORT
+                        )
+                }
+                droneStatus = status
+            }
+        })
+
+        mqttConnection.setNavStatusCallback(object : INavStatusCallback {
+            override fun onUpdateReceived(status: DroneNavStatus) {
+                val gpsModeArray = resources.getStringArray(R.array.nav_status_gps_mode)
+                navStatusGpsModeTextView.text =
+                    if (gpsModeArray.size > status.gps_mode) gpsModeArray[status.gps_mode] else "Invalid"
+                val navStateArray =
+                    resources.getStringArray(R.array.nav_status_nav_state)
+                navStatusNavStateTextView.text =
+                    if (navStateArray.size > status.nav_state) navStateArray[status.nav_state] else "Invalid"
+                navStatusWpNumberTextView.text = status.wp_number.toString()
+                val errorStateArray =
+                    resources.getStringArray(R.array.nav_status_error_description)
+                errorStatusTextView.text =
+                    if (errorStateArray.size > status.nav_error) errorStateArray[status.nav_error] else "Invalid"
+            }
+        })
+
+        mqttConnection.setGPSCallback(object : IGpsCallback {
+            override fun onUpdateReceived(status: DroneGpsStatus) {
+                if (::dronePositionMarker.isInitialized) {
+                    dronePositionMarker.position = status.getLatLng()
+                    if (droneStatus.online) dronePositionMarker.isVisible = true
+                }
+                val fixArray = resources.getStringArray(R.array.nav_status_gps_fix)
+                gpsStatusFixTextView.text =
+                    if (fixArray.size > status.fix) fixArray[status.fix] else "Invalid"
+                gpsStatusSpeedTextView.text = getString(
+                    R.string.gps_status_speed_value,
+                    (status.speed.toDouble() / 100)
+                )
+                gpsStatusNumSatTextView.text = status.numsat.toString()
+                gpsStatusAltitudeTextView.text = getString(
+                    R.string.gps_status_altitude_value, status.alt
+                )
+            }
+        })
     }
 
     private fun setConnectionState(state: Int) {

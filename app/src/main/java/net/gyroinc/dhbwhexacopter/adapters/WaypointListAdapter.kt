@@ -54,7 +54,6 @@ class WaypointListAdapter(
         viewHolder: ViewHolder,
         position: Int
     ): View {
-        // We return the view holder's view on which the user has to touch to drag the item
         return viewHolder.binding.dragIcon
     }
 }

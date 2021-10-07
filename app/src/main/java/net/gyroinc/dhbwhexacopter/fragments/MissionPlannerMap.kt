@@ -45,23 +45,21 @@ class MissionPlannerMap(
         mapFragment.getMapAsync(this)
     }
 
-
-    override fun onMapReady(googleMap: GoogleMap?) {
-        this.googleMap = googleMap ?: return
-        this.googleMap.isBuildingsEnabled = false
-        this.googleMap.isIndoorEnabled = false
-        this.googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
-        this.googleMap.uiSettings.isIndoorLevelPickerEnabled = false
-        this.googleMap.uiSettings.isCompassEnabled = true
-        this.googleMap.uiSettings.isMyLocationButtonEnabled = true
-        this.googleMap.uiSettings.isZoomControlsEnabled = false
-        this.googleMap.uiSettings.isTiltGesturesEnabled = false
-        this.googleMap.uiSettings.isMapToolbarEnabled = false
-        this.googleMap.setOnMapLongClickListener(this)
-        this.googleMap.setOnMarkerDragListener(this)
-        this.googleMap.setOnInfoWindowClickListener(this)
-        this.googleMap.setOnMyLocationClickListener(this)
-        this.googleMap.moveCamera(
+    private fun setupMap() {
+        googleMap.isBuildingsEnabled = false
+        googleMap.isIndoorEnabled = false
+        googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
+        googleMap.uiSettings.isIndoorLevelPickerEnabled = false
+        googleMap.uiSettings.isCompassEnabled = true
+        googleMap.uiSettings.isMyLocationButtonEnabled = true
+        googleMap.uiSettings.isZoomControlsEnabled = false
+        googleMap.uiSettings.isTiltGesturesEnabled = false
+        googleMap.uiSettings.isMapToolbarEnabled = false
+        googleMap.setOnMapLongClickListener(this)
+        googleMap.setOnMarkerDragListener(this)
+        googleMap.setOnInfoWindowClickListener(this)
+        googleMap.setOnMyLocationClickListener(this)
+        googleMap.moveCamera(
             CameraUpdateFactory.newLatLngZoom(
                 LatLng(
                     49.02657630563075,
@@ -69,13 +67,22 @@ class MissionPlannerMap(
                 ), 15f
             )
         )
+    }
+
+    override fun onMapReady(googleMap: GoogleMap?) {
+        this.googleMap = googleMap ?: return
+        setupMap()
+        setupDronePositionMarker()
+        enableMyLocation()
+        mapReadyCallback.onMapReady(googleMap)
+    }
+
+    private fun setupDronePositionMarker() {
         dronePositionMarker = this.googleMap.addMarker(
             MarkerOptions().visible(false).position(LatLng(0.0, 0.0)).zIndex(100f)
                 .anchor(0.5f, 0.5f)
         )
         dronePositionMarker?.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_drone_marker))
-        enableMyLocation()
-        mapReadyCallback.onMapReady(googleMap)
     }
 
     override fun onInfoWindowClick(waypointMarker: Marker) {

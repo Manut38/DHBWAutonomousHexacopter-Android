@@ -36,17 +36,18 @@ class WaypointListFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         retainInstance = true
-
         val view = inflater.inflate(R.layout.waypoint_list_fragment, container, false)
-        view.findViewById<ImageView>(R.id.close_button).setOnClickListener { dismiss() }
+        bindViews(view)
+        setupButtonActions(view)
+        setupWaypointList()
+        return view
+    }
 
-        waypointList = view.findViewById(R.id.waypoint_list)
+    private fun setupWaypointList() {
         waypointList.layoutManager = LinearLayoutManager(context)
         waypointList.orientation =
             DragDropSwipeRecyclerView.ListOrientation.VERTICAL_LIST_WITH_VERTICAL_DRAGGING
-
 
         val onItemClickListener: (Waypoint) -> Unit = { waypoint ->
             val dialog = WaypointPropertiesFragment().also { dialog ->
@@ -100,8 +101,11 @@ class WaypointListFragment : BottomSheetDialogFragment() {
                 waypointListAdapter.notifyDataSetChanged()
             }
         }
+    }
 
-        buttonClear = view.findViewById(R.id.button_clear_waypoints)
+    private fun setupButtonActions(view: View) {
+        view.findViewById<ImageView>(R.id.close_button).setOnClickListener { dismiss() }
+
         buttonClear.setOnClickListener {
             val builder: AlertDialog.Builder? = activity?.let {
                 AlertDialog.Builder(it)
@@ -121,7 +125,6 @@ class WaypointListFragment : BottomSheetDialogFragment() {
             builder?.create()?.show()
         }
 
-        buttonAddRth = view.findViewById(R.id.button_add_rth)
         buttonAddRth.setOnClickListener {
             (activity)
             val wp = (activity as MissionPlannerActivity).addWaypoint(WaypointTypeRth::class)
@@ -129,13 +132,18 @@ class WaypointListFragment : BottomSheetDialogFragment() {
             waypointList.smoothScrollToPosition(waypointListAdapter.itemCount - 1)
         }
 
-        buttonAddJump = view.findViewById(R.id.button_add_jump)
         buttonAddJump.setOnClickListener {
             val wp = (activity as MissionPlannerActivity).addWaypoint(WaypointTypeJump::class)
             waypointListAdapter.addItem(wp)
             waypointList.smoothScrollToPosition(waypointListAdapter.itemCount - 1)
         }
-        return view
+    }
+
+    private fun bindViews(view: View) {
+        waypointList = view.findViewById(R.id.waypoint_list)
+        buttonClear = view.findViewById(R.id.button_clear_waypoints)
+        buttonAddRth = view.findViewById(R.id.button_add_rth)
+        buttonAddJump = view.findViewById(R.id.button_add_jump)
     }
 
     companion object {

@@ -14,7 +14,7 @@ import org.json.JSONObject
 import javax.net.ssl.SSLSocketFactory
 
 class MQTTConnection(val context: Context) {
-    lateinit var mqttClient: MqttAndroidClient
+    private lateinit var mqttClient: MqttAndroidClient
     private lateinit var navStatusCallback: INavStatusCallback
     private lateinit var droneStatusCallback: IDroneStatusCallback
     private lateinit var gpsCallback: IGpsCallback
@@ -36,56 +36,62 @@ class MQTTConnection(val context: Context) {
         options.password = password?.toCharArray()
         if (useTls) options.socketFactory = SSLSocketFactory.getDefault()
 
+        setMqttCallbacks()
+        return mqttClient.connect(options)
+    }
+
+    private fun setMqttCallbacks() {
         mqttClient.setCallback(object : MqttCallback {
             override fun connectionLost(cause: Throwable?) {
                 mqttStatusCallback.onConnectionLost()
             }
 
             override fun messageArrived(topic: String, message: MqttMessage) {
-                when (topic) {
-                    TOPIC_GET_STATUS -> {
-                        val json = JSONObject(String(message.payload))
-                        val droneStatus = DroneStatus(json.getBoolean("online"))
-                        droneStatusCallback.onUpdateReceived(droneStatus)
-                    }
-                    TOPIC_NAV_STATUS -> {
-                        val json = JSONObject(String(message.payload))
-                        navStatusCallback.onUpdateReceived(
-                            DroneNavStatus(
-                                json.getInt("gps_mode"),
-                                json.getInt("nav_state"),
-                                json.getInt("action"),
-                                json.getInt("wp_number"),
-                                json.getInt("nav_error"),
-                                json.getInt("target_bearing")
-                            )
-                        )
-                    }
-                    TOPIC_GET_GPS -> {
-                        val json = JSONObject(String(message.payload))
-                        gpsCallback.onUpdateReceived(
-                            DroneGpsStatus(
-                                json.getInt("fix"),
-                                json.getInt("numsat"),
-                                json.getInt("lat"),
-                                json.getInt("lon"),
-                                json.getInt("alt"),
-                                json.getInt("speed"),
-                                json.getInt("ground_course"),
-                                json.getInt("hdop")
-                            )
-                        )
-                    }
-                }
+                processMqttMessage(topic, message)
             }
 
             override fun deliveryComplete(token: IMqttDeliveryToken?) {
-//                TODO("Not yet implemented")
             }
-
         })
+    }
 
-        return mqttClient.connect(options)
+    private fun processMqttMessage(
+        topic: String,
+        message: MqttMessage
+    ) {
+        val json = JSONObject(String(message.payload))
+        when (topic) {
+            TOPIC_GET_STATUS -> {
+                val droneStatus = DroneStatus(json.getBoolean("online"))
+                droneStatusCallback.onUpdateReceived(droneStatus)
+            }
+            TOPIC_NAV_STATUS -> {
+                navStatusCallback.onUpdateReceived(
+                    DroneNavStatus(
+                        json.getInt("gps_mode"),
+                        json.getInt("nav_state"),
+                        json.getInt("action"),
+                        json.getInt("wp_number"),
+                        json.getInt("nav_error"),
+                        json.getInt("target_bearing")
+                    )
+                )
+            }
+            TOPIC_GET_GPS -> {
+                gpsCallback.onUpdateReceived(
+                    DroneGpsStatus(
+                        json.getInt("fix"),
+                        json.getInt("numsat"),
+                        json.getInt("lat"),
+                        json.getInt("lon"),
+                        json.getInt("alt"),
+                        json.getInt("speed"),
+                        json.getInt("ground_course"),
+                        json.getInt("hdop")
+                    )
+                )
+            }
+        }
     }
 
     fun disconnect(): IMqttToken {
@@ -145,6 +151,10 @@ class MQTTConnection(val context: Context) {
 
     fun setMQTTStatusCallback(callback: IMqttStatusCallback) {
         mqttStatusCallback = callback
+    }
+
+    fun unregisterResources() {
+        return mqttClient.unregisterResources()
     }
 
     fun publishWaypoints(waypoints: List<Waypoint>) {
