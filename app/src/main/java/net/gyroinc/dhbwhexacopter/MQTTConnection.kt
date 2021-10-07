@@ -1,7 +1,6 @@
 package net.gyroinc.dhbwhexacopter
 
 import android.content.Context
-import android.widget.Toast
 import androidx.preference.PreferenceManager
 import net.gyroinc.dhbwhexacopter.models.DroneGpsStatus
 import net.gyroinc.dhbwhexacopter.models.DroneNavStatus
@@ -20,7 +19,7 @@ class MQTTConnection(val context: Context) {
     private lateinit var gpsCallback: IGpsCallback
     private lateinit var mqttStatusCallback: IMqttStatusCallback
 
-    fun connect(): IMqttToken {
+    fun connect(callback: IMqttActionListener) {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         val serverAddress = sharedPreferences.getString("mqtt_server", "")
         val port = sharedPreferences.getString("mqtt_port", "1883")
@@ -37,7 +36,7 @@ class MQTTConnection(val context: Context) {
         if (useTls) options.socketFactory = SSLSocketFactory.getDefault()
 
         setMqttCallbacks()
-        return mqttClient.connect(options)
+        mqttClient.connect(options).also { token -> token.actionCallback = callback }
     }
 
     private fun setMqttCallbacks() {
@@ -98,6 +97,10 @@ class MQTTConnection(val context: Context) {
         return mqttClient.disconnect()
     }
 
+    fun unregisterResources() {
+        return mqttClient.unregisterResources()
+    }
+
     fun isConnected(): Boolean {
         return if (this::mqttClient.isInitialized) {
             mqttClient.isConnected
@@ -106,55 +109,24 @@ class MQTTConnection(val context: Context) {
 
     fun setNavStatusCallback(callback: INavStatusCallback) {
         navStatusCallback = callback
-        val token = mqttClient.subscribe(TOPIC_NAV_STATUS, 1)
-        token.actionCallback = object : IMqttActionListener {
-            override fun onSuccess(asyncActionToken: IMqttToken?) {}
-            override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                Toast.makeText(
-                    context,
-                    "Failed to subscribe to drone status updates!",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
     }
 
     fun setDroneStatusCallback(callback: IDroneStatusCallback) {
         droneStatusCallback = callback
-        val token = mqttClient.subscribe(TOPIC_GET_STATUS, 1)
-        token.actionCallback = object : IMqttActionListener {
-            override fun onSuccess(asyncActionToken: IMqttToken?) {}
-            override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                Toast.makeText(
-                    context,
-                    "Failed to subscribe to drone status updates!",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
+    }
+
+    fun subscribeToTopics(callback: IMqttActionListener) {
+        mqttClient.subscribe(TOPIC_GET_STATUS, 1).also { token -> token.actionCallback = callback }
+        mqttClient.subscribe(TOPIC_NAV_STATUS, 1).also { token -> token.actionCallback = callback }
+        mqttClient.subscribe(TOPIC_GET_GPS, 1).also { token -> token.actionCallback = callback }
     }
 
     fun setGPSCallback(callback: IGpsCallback) {
         gpsCallback = callback
-        val token = mqttClient.subscribe(TOPIC_GET_GPS, 1)
-        token.actionCallback = object : IMqttActionListener {
-            override fun onSuccess(asyncActionToken: IMqttToken?) {}
-            override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                Toast.makeText(
-                    context,
-                    "Failed to subscribe to drone status updates!",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
     }
 
     fun setMQTTStatusCallback(callback: IMqttStatusCallback) {
         mqttStatusCallback = callback
-    }
-
-    fun unregisterResources() {
-        return mqttClient.unregisterResources()
     }
 
     fun publishWaypoints(waypoints: List<Waypoint>) {

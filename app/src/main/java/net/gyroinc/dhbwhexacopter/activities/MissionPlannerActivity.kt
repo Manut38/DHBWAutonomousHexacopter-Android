@@ -178,24 +178,34 @@ class MissionPlannerActivity : AppCompatActivity() {
 
     private fun connectMQTT() {
         showStatusSnackBar("Connecting...", Snackbar.LENGTH_SHORT)
-        val token = mqttConnection.connect()
-        token.actionCallback =
-            object : IMqttActionListener {
-                override fun onSuccess(asyncActionToken: IMqttToken) {
-                    setConnectionState(MQTT_CONNECTED)
-                    showStatusSnackBar("MQTT Connected!", Snackbar.LENGTH_SHORT)
-                }
+        val connectCallback = object : IMqttActionListener {
+            override fun onSuccess(asyncActionToken: IMqttToken) {
+                setConnectionState(MQTT_CONNECTED)
+                showStatusSnackBar("MQTT Connected!", Snackbar.LENGTH_SHORT)
 
-                override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
-                    showStatusSnackBar(
-                        "Failed to connect to MQTT server",
-                        Snackbar.LENGTH_SHORT
-                    )
-                    Log.e(MQTTConnection.TAG, "Failed to connect")
-                    Log.e(MQTTConnection.TAG, exception.localizedMessage!!)
-                    mqttConnection.unregisterResources()
+                val subscribeCallback = object : IMqttActionListener {
+                    override fun onSuccess(asyncActionToken: IMqttToken?) {}
+                    override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+                        showStatusSnackBar(
+                            "Failed to subscribe to drone status updates!",
+                            Snackbar.LENGTH_SHORT
+                        )
+                    }
                 }
+                mqttConnection.subscribeToTopics(subscribeCallback)
             }
+
+            override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
+                showStatusSnackBar(
+                    "Failed to connect to MQTT server",
+                    Snackbar.LENGTH_SHORT
+                )
+                Log.e(MQTTConnection.TAG, "Failed to connect")
+                Log.e(MQTTConnection.TAG, exception.localizedMessage!!)
+                mqttConnection.unregisterResources()
+            }
+        }
+        mqttConnection.connect(connectCallback)
     }
 
     private fun setupMqttCallbacks() {
