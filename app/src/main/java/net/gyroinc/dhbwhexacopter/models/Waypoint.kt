@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.primaryConstructor
 
-abstract class Waypoint(var wpNum: Int, private var latLng: LatLng, var marker: Marker) {
+abstract class Waypoint(var wpNum: Int, var latLng: LatLng, var marker: Marker) {
     var altitude: Float = 15f           // Altitude in m
     var speed: Float = 0.1f             // Speed in m/s
     var waitTime: Int = 0               // Wait Time in s
@@ -76,20 +76,6 @@ abstract class Waypoint(var wpNum: Int, private var latLng: LatLng, var marker: 
     abstract fun getP1(): Int
 
     abstract fun getP2(): Int
-
-    fun getJSONObject(last: Boolean): JSONObject {
-        val json = JSONObject()
-        json.put("wp_no", wpNum)
-        json.put("action", getTypeID())
-        json.put("lat", if (requiresPosition()) (latLng.latitude * 10000000).toInt() else 0)
-        json.put("lon", if (requiresPosition()) (latLng.longitude * 10000000).toInt() else 0)
-        json.put("altitude", if (requiresPosition()) (altitude * 100).toInt() else 0)
-        json.put("p1", getP1())
-        json.put("p2", getP2())
-        json.put("p3", 0)
-        json.put("flag", if (last) 0xa5 else 0)
-        return json
-    }
 
     companion object {
         fun <T : Waypoint> getInstanceOf(

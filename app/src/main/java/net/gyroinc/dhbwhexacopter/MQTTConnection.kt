@@ -6,10 +6,10 @@ import net.gyroinc.dhbwhexacopter.models.DroneGpsStatus
 import net.gyroinc.dhbwhexacopter.models.DroneNavStatus
 import net.gyroinc.dhbwhexacopter.models.DroneStatus
 import net.gyroinc.dhbwhexacopter.models.Waypoint
+import net.gyroinc.dhbwhexacopter.utils.JsonMessage
+import net.gyroinc.dhbwhexacopter.utils.MqttMessageBuilder
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
-import org.json.JSONArray
-import org.json.JSONObject
 import javax.net.ssl.SSLSocketFactory
 
 class MQTTConnection(val context: Context) {
@@ -58,37 +58,16 @@ class MQTTConnection(val context: Context) {
         topic: String,
         message: MqttMessage
     ) {
-        val json = JSONObject(String(message.payload))
+        val json = JsonMessage.fromMqttMessage(message)
         when (topic) {
             TOPIC_GET_STATUS -> {
-                val droneStatus = DroneStatus(json.getBoolean("online"))
-                droneStatusCallback.onUpdateReceived(droneStatus)
+                droneStatusCallback.onUpdateReceived(JsonMessage.toDroneStatus(json))
             }
             TOPIC_NAV_STATUS -> {
-                navStatusCallback.onUpdateReceived(
-                    DroneNavStatus(
-                        json.getInt("gps_mode"),
-                        json.getInt("nav_state"),
-                        json.getInt("action"),
-                        json.getInt("wp_number"),
-                        json.getInt("nav_error"),
-                        json.getInt("target_bearing")
-                    )
-                )
+                navStatusCallback.onUpdateReceived(JsonMessage.toDroneNavStatus(json))
             }
             TOPIC_GET_GPS -> {
-                gpsCallback.onUpdateReceived(
-                    DroneGpsStatus(
-                        json.getInt("fix"),
-                        json.getInt("numsat"),
-                        json.getInt("lat"),
-                        json.getInt("lon"),
-                        json.getInt("alt"),
-                        json.getInt("speed"),
-                        json.getInt("ground_course"),
-                        json.getInt("hdop")
-                    )
-                )
+                gpsCallback.onUpdateReceived(JsonMessage.toDroneGpsStatus(json))
             }
         }
     }
@@ -130,26 +109,13 @@ class MQTTConnection(val context: Context) {
     }
 
     fun publishWaypoints(waypoints: List<Waypoint>) {
-        val jsonArray = JSONArray()
-        waypoints.forEachIndexed { i, waypoint: Waypoint ->
-            val jsonWaypoint =
-                if (waypoints.size == i + 1)
-                    waypoint.getJSONObject(true)
-                else
-                    waypoint.getJSONObject(false)
-            jsonArray.put(jsonWaypoint)
-        }
-        val message = MqttMessage(jsonArray.toString().toByteArray(Charsets.UTF_8))
+        val message = MqttMessageBuilder.fromJsonArray(JsonMessage.fromWaypoints(waypoints))
         mqttClient.publish(TOPIC_SET_WP, message)
     }
 
     fun publishLEDColor(r: Int, g: Int, b: Int, brightness: Int) {
-        val jsonObject = JSONObject()
-        jsonObject.put("r", r)
-        jsonObject.put("g", g)
-        jsonObject.put("b", b)
-        jsonObject.put("brightness", brightness)
-        val message = MqttMessage(jsonObject.toString().toByteArray(Charsets.UTF_8))
+        val message =
+            MqttMessageBuilder.fromJsonObject(JsonMessage.fromLedColors(r, g, b, brightness))
         mqttClient.publish(TOPIC_SET_LED, message)
     }
 
