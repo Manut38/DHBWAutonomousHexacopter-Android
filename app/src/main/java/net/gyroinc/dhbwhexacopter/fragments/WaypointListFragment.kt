@@ -23,7 +23,6 @@ import net.gyroinc.dhbwhexacopter.models.WaypointTypeJump
 import net.gyroinc.dhbwhexacopter.models.WaypointTypeRth
 
 class WaypointListFragment : BottomSheetDialogFragment() {
-
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var waypointList: DragDropSwipeRecyclerView
     private lateinit var waypointListAdapter: WaypointListAdapter

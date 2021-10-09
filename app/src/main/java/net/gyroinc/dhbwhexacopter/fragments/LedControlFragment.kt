@@ -9,15 +9,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
-import androidx.fragment.app.activityViewModels
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.madrapps.pikolo.HSLColorPicker
 import com.madrapps.pikolo.listeners.SimpleColorSelectionListener
 import net.gyroinc.dhbwhexacopter.R
 import net.gyroinc.dhbwhexacopter.activities.MissionPlannerActivity
-import net.gyroinc.dhbwhexacopter.models.MainViewModel
-
 
 class LedControlFragment : BottomSheetDialogFragment() {
     private lateinit var prefs: SharedPreferences

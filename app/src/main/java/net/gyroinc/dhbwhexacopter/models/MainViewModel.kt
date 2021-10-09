@@ -6,5 +6,3 @@ import java.util.*
 class MainViewModel : ViewModel() {
     val waypoints: LinkedList<Waypoint> = LinkedList()
 }
-
-
