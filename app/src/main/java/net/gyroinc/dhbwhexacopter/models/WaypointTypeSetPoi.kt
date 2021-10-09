@@ -8,7 +8,7 @@ import com.google.android.gms.maps.model.Marker
 class WaypointTypeSetPoi(wpNum: Int, latLng: LatLng, marker: Marker) :
     Waypoint(wpNum, latLng, marker) {
     override fun getTypeID(): Int {
-        return 5
+        return Companion.getTypeID()
     }
 
     override fun getMarkerIcon(): BitmapDescriptor {
@@ -44,6 +44,10 @@ class WaypointTypeSetPoi(wpNum: Int, latLng: LatLng, marker: Marker) :
     }
 
     companion object {
+        fun getTypeID(): Int {
+            return 5
+        }
+
         fun getTypeString(): String {
             return "SET_POI"
         }

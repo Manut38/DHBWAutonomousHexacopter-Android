@@ -8,7 +8,7 @@ import com.google.android.gms.maps.model.Marker
 class WaypointTypeSetHead(wpNum: Int, latLng: LatLng, marker: Marker) :
     Waypoint(wpNum, latLng, marker) {
     override fun getTypeID(): Int {
-        return 7
+        return Companion.getTypeID()
     }
 
     override fun getMarkerIcon(): BitmapDescriptor {
@@ -44,6 +44,10 @@ class WaypointTypeSetHead(wpNum: Int, latLng: LatLng, marker: Marker) :
     }
 
     companion object {
+        fun getTypeID(): Int {
+            return 7
+        }
+
         fun getTypeString(): String {
             return "SET_HEAD"
         }

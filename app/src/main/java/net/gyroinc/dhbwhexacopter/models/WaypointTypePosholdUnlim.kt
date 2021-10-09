@@ -8,7 +8,7 @@ import com.google.android.gms.maps.model.Marker
 class WaypointTypePosholdUnlim(wpNum: Int, latLng: LatLng, marker: Marker) :
     Waypoint(wpNum, latLng, marker) {
     override fun getTypeID(): Int {
-        return 2
+        return Companion.getTypeID()
     }
 
     override fun getMarkerIcon(): BitmapDescriptor {
@@ -44,6 +44,10 @@ class WaypointTypePosholdUnlim(wpNum: Int, latLng: LatLng, marker: Marker) :
     }
 
     companion object {
+        fun getTypeID(): Int {
+            return 2
+        }
+
         fun getTypeString(): String {
             return "POSHOLD_UNLIM"
         }
