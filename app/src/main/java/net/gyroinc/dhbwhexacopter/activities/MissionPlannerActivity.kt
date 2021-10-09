@@ -27,6 +27,7 @@ import net.gyroinc.dhbwhexacopter.fragments.LedControlFragment
 import net.gyroinc.dhbwhexacopter.fragments.MissionPlannerMap
 import net.gyroinc.dhbwhexacopter.fragments.WaypointListFragment
 import net.gyroinc.dhbwhexacopter.models.*
+import net.gyroinc.dhbwhexacopter.utils.LatLngConverter
 import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttToken
 import kotlin.reflect.KClass
@@ -252,7 +253,7 @@ class MissionPlannerActivity : AppCompatActivity() {
         mqttConnection.setGPSCallback(object : IGpsCallback {
             override fun onUpdateReceived(status: DroneGpsStatus) {
                 if (::dronePositionMarker.isInitialized) {
-                    dronePositionMarker.position = status.getLatLng()
+                    dronePositionMarker.position = LatLngConverter.fromDroneGpsStatus(status)
                     if (droneStatus.online) dronePositionMarker.isVisible = true
                 }
                 val fixArray = resources.getStringArray(R.array.nav_status_gps_fix)
