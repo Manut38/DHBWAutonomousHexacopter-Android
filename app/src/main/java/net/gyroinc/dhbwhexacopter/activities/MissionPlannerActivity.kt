@@ -15,21 +15,21 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
-import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import net.gyroinc.dhbwhexacopter.*
+import net.gyroinc.dhbwhexacopter.R
 import net.gyroinc.dhbwhexacopter.fragments.LedControlFragment
-import net.gyroinc.dhbwhexacopter.map.MissionPlannerMap
 import net.gyroinc.dhbwhexacopter.fragments.WaypointListFragment
-import net.gyroinc.dhbwhexacopter.interfaces.IDroneStatusCallback
-import net.gyroinc.dhbwhexacopter.interfaces.IGpsCallback
-import net.gyroinc.dhbwhexacopter.interfaces.IMqttStatusCallback
-import net.gyroinc.dhbwhexacopter.interfaces.INavStatusCallback
+import net.gyroinc.dhbwhexacopter.fragments.WaypointPropertiesFragment
+import net.gyroinc.dhbwhexacopter.interfaces.*
+import net.gyroinc.dhbwhexacopter.map.MissionPlannerMap
 import net.gyroinc.dhbwhexacopter.models.*
 import net.gyroinc.dhbwhexacopter.mqtt.MQTTConnection
 import net.gyroinc.dhbwhexacopter.utils.LatLngConverter
@@ -37,9 +37,10 @@ import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttToken
 import kotlin.reflect.KClass
 
-class MissionPlannerActivity : AppCompatActivity() {
+class MissionPlannerActivity : AppCompatActivity(), IColorChangeListener, IWaypointListObserver,
+    OnInfoWindowClickListener, IWaypointAddListener {
 
-    lateinit var missionPlannerMap: MissionPlannerMap
+    private lateinit var missionPlannerMap: MissionPlannerMap
     var mqttConnection: MQTTConnection = MQTTConnection(this)
     private lateinit var viewModel: MainViewModel
     private lateinit var fab: FloatingActionButton
@@ -101,12 +102,15 @@ class MissionPlannerActivity : AppCompatActivity() {
     }
 
     private fun initializeMap() {
-        missionPlannerMap = MissionPlannerMap(this, R.id.map, viewModel.waypoints)
-        missionPlannerMap.setOnMapLongClickListener { latLng ->
-            addWaypoint(WaypointTypeNormal::class, latLng)
+        missionPlannerMap = MissionPlannerMap(this, R.id.map, viewModel.waypoints, this)
+        missionPlannerMap.mapLongClickListener = OnMapLongClickListener { latLng ->
+            addWaypoint(
+                WaypointTypeNormal::class,
+                latLng
+            )
         }
         bottomAppBar.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        missionPlannerMap.setOnMapReadyCallback { googleMap ->
+        missionPlannerMap.mapReadyCallback = OnMapReadyCallback { googleMap ->
             googleMap.setPadding(
                 0,
                 getStatusBarHeight(),
@@ -156,7 +160,13 @@ class MissionPlannerActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         android.R.id.home -> {
-            WaypointListFragment().also {
+            val waypointLocationClickListener = object : IWaypointItemClickListener {
+                override fun onClick(waypoint: Waypoint) {
+                    missionPlannerMap.focusOnWaypoint(waypoint)
+                }
+            }
+
+            WaypointListFragment(this, waypointLocationClickListener, this).also {
                 it.show(
                     supportFragmentManager,
                     WaypointListFragment.TAG
@@ -174,7 +184,12 @@ class MissionPlannerActivity : AppCompatActivity() {
             true
         }
         R.id.action_led -> {
-            LedControlFragment().also { it.show(supportFragmentManager, LedControlFragment.TAG) }
+            LedControlFragment(this).also {
+                it.show(
+                    supportFragmentManager,
+                    LedControlFragment.TAG
+                )
+            }
             true
         }
         else -> {
@@ -330,23 +345,23 @@ class MissionPlannerActivity : AppCompatActivity() {
         return waypoint
     }
 
-    fun <T : Waypoint> addWaypoint(type: KClass<T>): Waypoint {
+    override fun <T : Waypoint> addWaypoint(type: KClass<T>): Waypoint {
         missionPlannerMap.getCurrentLocation()?.let { location ->
             return addWaypoint(type, LatLng(location.latitude, location.longitude))
         }
         return addWaypoint(type, LatLng(0.0, 0.0))
     }
 
-    fun onWaypointRemoved(waypointIndex: Int) {
-        viewModel.waypoints[waypointIndex].marker.remove()
-        viewModel.waypoints.removeAt(waypointIndex)
-        for (i in waypointIndex until viewModel.waypoints.size) {
+    override fun onWaypointRemoved(index: Int) {
+        viewModel.waypoints[index].marker.remove()
+        viewModel.waypoints.removeAt(index)
+        for (i in index until viewModel.waypoints.size) {
             viewModel.waypoints[i].setInfoWindowWPNumber(i + 1)
         }
         missionPlannerMap.updatePolylines()
     }
 
-    fun onWaypointsCleared() {
+    override fun onWaypointsCleared() {
         viewModel.waypoints.forEach {
             it.marker.remove()
         }
@@ -354,7 +369,11 @@ class MissionPlannerActivity : AppCompatActivity() {
         missionPlannerMap.updatePolylines()
     }
 
-    fun onWaypointIndexChanged(prevIndex: Int, newIndex: Int) {
+    override fun onWaypointListUpdated() {
+        missionPlannerMap.updatePolylines()
+    }
+
+    override fun onWaypointIndexChanged(prevIndex: Int, newIndex: Int) {
         val waypoint = viewModel.waypoints[prevIndex]
         viewModel.waypoints.removeAt(prevIndex)
         viewModel.waypoints.add(newIndex, waypoint)
@@ -362,11 +381,6 @@ class MissionPlannerActivity : AppCompatActivity() {
             viewModel.waypoints[i].setInfoWindowWPNumber(i + 1)
         }
         missionPlannerMap.updatePolylines()
-    }
-
-    fun focusOnWaypoint(waypoint: Waypoint) {
-        waypoint.marker.showInfoWindow()
-        missionPlannerMap.animateCamera(CameraUpdateFactory.newLatLng(waypoint.marker.position))
     }
 
     private fun getStatusBarHeight(): Int {
@@ -379,6 +393,22 @@ class MissionPlannerActivity : AppCompatActivity() {
     private fun showStatusSnackBar(message: String, length: Int) {
         val snack: Snackbar = Snackbar.make(mainLayout, message, length)
         snack.show()
+    }
+
+    override fun onColorChanged(r: Int, g: Int, b: Int, brightness: Int) {
+        mqttConnection.publishLEDColor(r, g, b, brightness)
+    }
+
+    override fun onInfoWindowClick(waypointMarker: Marker) {
+        val dialog = WaypointPropertiesFragment(this).also { dialog ->
+            dialog.arguments = Bundle().also { bundle ->
+                bundle.putInt(
+                    "waypointIndex",
+                    waypointMarker.tag as Int
+                )
+            }
+        }
+        dialog.show(supportFragmentManager, WaypointPropertiesFragment.TAG)
     }
 
     companion object {

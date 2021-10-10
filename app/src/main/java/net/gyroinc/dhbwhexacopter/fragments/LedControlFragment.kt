@@ -14,9 +14,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.madrapps.pikolo.HSLColorPicker
 import com.madrapps.pikolo.listeners.SimpleColorSelectionListener
 import net.gyroinc.dhbwhexacopter.R
-import net.gyroinc.dhbwhexacopter.activities.MissionPlannerActivity
+import net.gyroinc.dhbwhexacopter.interfaces.IColorChangeListener
 
-class LedControlFragment : BottomSheetDialogFragment() {
+class LedControlFragment(private val colorChangeListener: IColorChangeListener) : BottomSheetDialogFragment() {
     private lateinit var prefs: SharedPreferences
     private lateinit var ledPowerButton: ImageView
     private lateinit var colorPreviewView: ImageView
@@ -47,7 +47,7 @@ class LedControlFragment : BottomSheetDialogFragment() {
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 prefs.edit().putInt("ledControlBrightness", seekBar.progress).apply()
-                publishColor()
+                colorsChanged()
             }
         })
         brightnessSeekBar.progress = prefs.getInt("ledControlBrightness", 0)
@@ -61,7 +61,7 @@ class LedControlFragment : BottomSheetDialogFragment() {
                 brightnessSeekBar.progress = 0
             }
             prefs.edit().putInt("ledControlBrightness", brightnessSeekBar.progress).apply()
-            publishColor()
+            colorsChanged()
         }
 
         view.findViewById<ImageView>(R.id.close_button).setOnClickListener { dismiss() }
@@ -69,7 +69,7 @@ class LedControlFragment : BottomSheetDialogFragment() {
         val onPresetClick =
             View.OnClickListener {
                 setPickedColor(it.backgroundTintList!!.defaultColor)
-                publishColor()
+                colorsChanged()
             }
 
         view.findViewById<ImageView>(R.id.color_preset_red).setOnClickListener(onPresetClick)
@@ -85,7 +85,7 @@ class LedControlFragment : BottomSheetDialogFragment() {
 
             override fun onColorSelectionEnd(color: Int) {
                 setPickedColor(color)
-                publishColor()
+                colorsChanged()
             }
         })
     }
@@ -104,16 +104,11 @@ class LedControlFragment : BottomSheetDialogFragment() {
         colorPreviewView.background.setTint(color)
     }
 
-    private fun publishColor() {
+    private fun colorsChanged() {
         val r: Int = Color.red(pickedColor)
         val g: Int = Color.green(pickedColor)
         val b: Int = Color.blue(pickedColor)
-        (activity as MissionPlannerActivity).mqttConnection.publishLEDColor(
-            r,
-            g,
-            b,
-            brightnessSeekBar.progress
-        )
+        colorChangeListener.onColorChanged(r,g,b, brightnessSeekBar.progress)
     }
 
     companion object {

@@ -10,23 +10,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import com.google.android.gms.maps.*
-import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener
-import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener
-import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
-import com.google.android.gms.maps.GoogleMap.OnMyLocationClickListener
-
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMap.*
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import net.gyroinc.dhbwhexacopter.R
-import net.gyroinc.dhbwhexacopter.fragments.WaypointPropertiesFragment
 import net.gyroinc.dhbwhexacopter.models.*
 
 class MissionPlannerMap(
     private val activity: FragmentActivity,
     resourceId: Int,
-    private val waypoints: List<Waypoint>
-) : OnMapReadyCallback,
-    OnInfoWindowClickListener, OnMarkerDragListener, OnMyLocationClickListener,
+    private val waypoints: List<Waypoint>,
+    private val onInfoWindowClickListener: OnInfoWindowClickListener
+) : OnMapReadyCallback, OnMarkerDragListener, OnMyLocationClickListener,
     OnMapLongClickListener, LocationListener, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private lateinit var googleMap: GoogleMap
@@ -37,8 +35,8 @@ class MissionPlannerMap(
     private lateinit var routePolyline: Polyline
     private lateinit var jumpPolylines: ArrayList<Polyline>
     private var permissionDenied = false
-    private lateinit var mapLongClickListener: OnMapLongClickListener
-    private lateinit var mapReadyCallback: OnMapReadyCallback
+    var mapLongClickListener: OnMapLongClickListener? = null
+    var mapReadyCallback: OnMapReadyCallback? = null
 
     init {
         val mapFragment = activity.supportFragmentManager
@@ -49,7 +47,7 @@ class MissionPlannerMap(
     private fun setupMap() {
         googleMap.isBuildingsEnabled = false
         googleMap.isIndoorEnabled = false
-        googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
+        googleMap.mapType = MAP_TYPE_SATELLITE
         googleMap.uiSettings.isIndoorLevelPickerEnabled = false
         googleMap.uiSettings.isCompassEnabled = true
         googleMap.uiSettings.isMyLocationButtonEnabled = true
@@ -58,7 +56,7 @@ class MissionPlannerMap(
         googleMap.uiSettings.isMapToolbarEnabled = false
         googleMap.setOnMapLongClickListener(this)
         googleMap.setOnMarkerDragListener(this)
-        googleMap.setOnInfoWindowClickListener(this)
+        googleMap.setOnInfoWindowClickListener(onInfoWindowClickListener)
         googleMap.setOnMyLocationClickListener(this)
         googleMap.moveCamera(
             CameraUpdateFactory.newLatLngZoom(
@@ -75,7 +73,7 @@ class MissionPlannerMap(
         setupMap()
         setupDronePositionMarker()
         enableMyLocation()
-        mapReadyCallback.onMapReady(googleMap)
+        mapReadyCallback?.onMapReady(googleMap)
     }
 
     private fun setupDronePositionMarker() {
@@ -84,18 +82,6 @@ class MissionPlannerMap(
                 .anchor(0.5f, 0.5f)
         )
         dronePositionMarker?.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_drone_marker))
-    }
-
-    override fun onInfoWindowClick(waypointMarker: Marker) {
-        val dialog = WaypointPropertiesFragment().also { dialog ->
-            dialog.arguments = Bundle().also { bundle ->
-                bundle.putInt(
-                    "waypointIndex",
-                    waypointMarker.tag as Int
-                )
-            }
-        }
-        dialog.show(activity.supportFragmentManager, WaypointPropertiesFragment.TAG)
     }
 
     fun updatePolylines() {
@@ -156,6 +142,11 @@ class MissionPlannerMap(
         }
     }
 
+    fun focusOnWaypoint(waypoint: Waypoint) {
+        waypoint.marker.showInfoWindow()
+        googleMap.animateCamera(CameraUpdateFactory.newLatLng(waypoint.marker.position))
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -213,12 +204,8 @@ class MissionPlannerMap(
         currentLocation = location
     }
 
-    fun addMarker(options: MarkerOptions): Marker?{
+    fun addMarker(options: MarkerOptions): Marker? {
         return googleMap.addMarker(options)
-    }
-
-    fun animateCamera(newLatLng: CameraUpdate) {
-        googleMap.animateCamera(newLatLng)
     }
 
     override fun onMarkerDragStart(p0: Marker?) {
@@ -237,7 +224,7 @@ class MissionPlannerMap(
     }
 
     override fun onMapLongClick(latLng: LatLng) {
-        mapLongClickListener.onMapLongClick(latLng)
+        mapLongClickListener?.onMapLongClick(latLng)
     }
 
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
@@ -246,14 +233,6 @@ class MissionPlannerMap(
 
     fun getCurrentLocation(): Location? {
         return currentLocation
-    }
-
-    fun setOnMapLongClickListener(listener: OnMapLongClickListener) {
-        mapLongClickListener = listener
-    }
-
-    fun setOnMapReadyCallback(callback: OnMapReadyCallback) {
-        mapReadyCallback = callback
     }
 
     companion object {

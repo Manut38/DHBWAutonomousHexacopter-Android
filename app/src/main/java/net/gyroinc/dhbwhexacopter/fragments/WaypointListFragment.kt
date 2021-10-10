@@ -16,14 +16,19 @@ import com.ernestoyaquello.dragdropswiperecyclerview.listener.OnItemSwipeListene
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import net.gyroinc.dhbwhexacopter.R
 import net.gyroinc.dhbwhexacopter.adapters.WaypointListAdapter
-import net.gyroinc.dhbwhexacopter.activities.MissionPlannerActivity
+import net.gyroinc.dhbwhexacopter.interfaces.IWaypointAddListener
 import net.gyroinc.dhbwhexacopter.interfaces.IWaypointItemClickListener
+import net.gyroinc.dhbwhexacopter.interfaces.IWaypointListObserver
 import net.gyroinc.dhbwhexacopter.models.MainViewModel
 import net.gyroinc.dhbwhexacopter.models.Waypoint
 import net.gyroinc.dhbwhexacopter.models.WaypointTypeJump
 import net.gyroinc.dhbwhexacopter.models.WaypointTypeRth
 
-class WaypointListFragment : BottomSheetDialogFragment() {
+class WaypointListFragment(
+    private val waypointListObserver: IWaypointListObserver,
+    private val waypointLocationClickListener: IWaypointItemClickListener,
+    private val waypointAddListener: IWaypointAddListener
+) : BottomSheetDialogFragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var waypointList: DragDropSwipeRecyclerView
     private lateinit var waypointListAdapter: WaypointListAdapter
@@ -36,7 +41,6 @@ class WaypointListFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        retainInstance = true
         val view = inflater.inflate(R.layout.waypoint_list_fragment, container, false)
         bindViews(view)
         setupButtonActions(view)
@@ -51,7 +55,7 @@ class WaypointListFragment : BottomSheetDialogFragment() {
 
         val onItemClickListener = object : IWaypointItemClickListener {
             override fun onClick(waypoint: Waypoint) {
-                val dialog = WaypointPropertiesFragment().also { dialog ->
+                val dialog = WaypointPropertiesFragment(waypointListObserver).also { dialog ->
                     dialog.arguments = Bundle().also { bundle ->
                         bundle.putInt(
                             "waypointIndex",
@@ -73,7 +77,7 @@ class WaypointListFragment : BottomSheetDialogFragment() {
         val onLocationClickListener = object : IWaypointItemClickListener {
             override fun onClick(waypoint: Waypoint) {
                 dismiss()
-                (context as MissionPlannerActivity).focusOnWaypoint(waypoint)
+                waypointLocationClickListener.onClick(waypoint)
             }
         }
 
@@ -92,7 +96,7 @@ class WaypointListFragment : BottomSheetDialogFragment() {
                     direction: OnItemSwipeListener.SwipeDirection,
                     item: Waypoint
                 ): Boolean {
-                    (activity as MissionPlannerActivity).onWaypointRemoved(position)
+                    waypointListObserver.onWaypointRemoved(position)
                     return false
                 }
             }
@@ -110,10 +114,7 @@ class WaypointListFragment : BottomSheetDialogFragment() {
                     finalPosition: Int,
                     item: Waypoint
                 ) {
-                    (activity as MissionPlannerActivity).onWaypointIndexChanged(
-                        initialPosition,
-                        finalPosition
-                    )
+                    waypointListObserver.onWaypointIndexChanged(initialPosition, finalPosition)
                     waypointListAdapter.notifyDataSetChanged()
                 }
             }
@@ -128,13 +129,13 @@ class WaypointListFragment : BottomSheetDialogFragment() {
             }
             builder?.setMessage(R.string.waypoint_list_clear_confirm)
             builder?.apply {
-                setPositiveButton(R.string.dialog_ok) { dialog, id ->
-                    (activity as MissionPlannerActivity).onWaypointsCleared()
+                setPositiveButton(R.string.dialog_ok) { _, _ ->
+                    waypointListObserver.onWaypointsCleared()
                     for (i in 0 until waypointListAdapter.itemCount) {
                         waypointListAdapter.removeItem(0)
                     }
                 }
-                setNegativeButton(R.string.dialog_cancel) { dialog, id ->
+                setNegativeButton(R.string.dialog_cancel) { dialog, _ ->
                     dialog.cancel()
                 }
             }
@@ -142,14 +143,13 @@ class WaypointListFragment : BottomSheetDialogFragment() {
         }
 
         buttonAddRth.setOnClickListener {
-            (activity)
-            val wp = (activity as MissionPlannerActivity).addWaypoint(WaypointTypeRth::class)
+            val wp = waypointAddListener.addWaypoint(WaypointTypeRth::class)
             waypointListAdapter.addItem(wp)
             waypointList.smoothScrollToPosition(waypointListAdapter.itemCount - 1)
         }
 
         buttonAddJump.setOnClickListener {
-            val wp = (activity as MissionPlannerActivity).addWaypoint(WaypointTypeJump::class)
+            val wp = waypointAddListener.addWaypoint(WaypointTypeJump::class)
             waypointListAdapter.addItem(wp)
             waypointList.smoothScrollToPosition(waypointListAdapter.itemCount - 1)
         }

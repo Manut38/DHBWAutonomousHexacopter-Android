@@ -13,12 +13,13 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.switchmaterial.SwitchMaterial
 import net.gyroinc.dhbwhexacopter.R
 import net.gyroinc.dhbwhexacopter.adapters.WaypointTypeListAdapter
-import net.gyroinc.dhbwhexacopter.activities.MissionPlannerActivity
+import net.gyroinc.dhbwhexacopter.interfaces.IWaypointListObserver
 import net.gyroinc.dhbwhexacopter.models.*
 import net.gyroinc.dhbwhexacopter.utils.InputFilterMinMax
 import kotlin.reflect.KClass
 
-class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickListener,
+class WaypointPropertiesFragment(private val waypointListObserver: IWaypointListObserver) :
+    BottomSheetDialogFragment(), View.OnClickListener,
     AdapterView.OnItemClickListener {
 
     private val viewModel: MainViewModel by activityViewModels()
@@ -76,7 +77,7 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
                 dismiss()
             }
             R.id.waypoint_button_delete -> {
-                (activity as MissionPlannerActivity).onWaypointRemoved(waypointIndex)
+                waypointListObserver.onWaypointRemoved(waypointIndex)
                 dismiss()
             }
         }
@@ -116,8 +117,7 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
                 layoutInflater.inflate(R.layout.waypoint_type_land, propertiesView)
             }
         }
-
-        (activity as MissionPlannerActivity).missionPlannerMap.updatePolylines()
+        waypointListObserver.onWaypointListUpdated()
         setupPropertyFields()
     }
 
@@ -151,7 +151,7 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
         jumpTarget?.doOnTextChanged { text, _, _, _ ->
             if (!text.isNullOrEmpty()) {
                 viewModel.waypoints[waypointIndex].jumpTarget = text.toString().toInt()
-                (activity as MissionPlannerActivity).missionPlannerMap.updatePolylines()
+                waypointListObserver.onWaypointListUpdated()
             }
         }
 
