@@ -6,11 +6,15 @@ import net.gyroinc.dhbwhexacopter.models.DroneGpsStatus
 class LatLngConverter {
     companion object {
         fun fromDroneGpsStatus(droneGpsStatus: DroneGpsStatus): LatLng{
-            return LatLng(convertToLatLngDouble(droneGpsStatus.lon), convertToLatLngDouble(droneGpsStatus.lat))
+            return LatLng(toLatLngDouble(droneGpsStatus.lon), toLatLngDouble(droneGpsStatus.lat))
         }
 
-        fun convertToLatLngDouble(value: Int): Double {
+        fun toLatLngDouble(value: Int): Double {
             return value.toDouble() / 1000000
+        }
+
+        fun toLatLngInt(value: Double): Int {
+            return (value * 10000000).toInt()
         }
     }
 }

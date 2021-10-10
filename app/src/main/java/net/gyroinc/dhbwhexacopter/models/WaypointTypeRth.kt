@@ -11,8 +11,8 @@ class WaypointTypeRth(wpNum: Int, latLng: LatLng, marker: Marker) :
         return Companion.getTypeID()
     }
 
-    override fun getMarkerIcon(): BitmapDescriptor {
-        return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+    override fun getMarkerHue(): Float {
+        return BitmapDescriptorFactory.HUE_RED
     }
 
     override fun getTypeString(): String {

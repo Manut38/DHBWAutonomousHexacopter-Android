@@ -11,8 +11,8 @@ class WaypointTypePosholdUnlim(wpNum: Int, latLng: LatLng, marker: Marker) :
         return Companion.getTypeID()
     }
 
-    override fun getMarkerIcon(): BitmapDescriptor {
-        return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)
+    override fun getMarkerHue(): Float {
+        return BitmapDescriptorFactory.HUE_MAGENTA
     }
 
     override fun getTypeString(): String {

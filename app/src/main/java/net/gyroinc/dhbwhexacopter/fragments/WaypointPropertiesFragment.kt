@@ -89,7 +89,6 @@ class WaypointPropertiesFragment : BottomSheetDialogFragment(), View.OnClickList
     private fun <T : Waypoint> setWaypointType(type: KClass<T>) {
         propertiesView.removeAllViews()
         viewModel.waypoints[waypointIndex] = viewModel.waypoints[waypointIndex].convertTo(type)
-        viewModel.waypoints[waypointIndex].updateMarker()
 
         when (type) {
             WaypointTypeNormal::class -> {

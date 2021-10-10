@@ -58,15 +58,18 @@ class JsonMessage {
             json.put("action", waypoint.getTypeID())
             json.put(
                 "lat",
-                if (waypoint.requiresPosition()) (waypoint.latLng.latitude * 10000000).toInt() else 0
+                if (waypoint.requiresPosition()) LatLngConverter.toLatLngInt(waypoint.latLng.latitude)
+                else 0
             )
             json.put(
                 "lon",
-                if (waypoint.requiresPosition()) (waypoint.latLng.longitude * 10000000).toInt() else 0
+                if (waypoint.requiresPosition()) LatLngConverter.toLatLngInt(waypoint.latLng.longitude)
+                else 0
             )
             json.put(
                 "altitude",
-                if (waypoint.requiresPosition()) (waypoint.altitude * 100).toInt() else 0
+                if (waypoint.requiresPosition()) waypoint.getAltitudeInCm()
+                else 0
             )
             json.put("p1", waypoint.getP1())
             json.put("p2", waypoint.getP2())
@@ -89,7 +92,7 @@ class JsonMessage {
         }
 
         fun fromMqttMessage(message: MqttMessage): JSONObject {
-            return  JSONObject(String(message.payload))
+            return JSONObject(String(message.payload))
         }
     }
 }

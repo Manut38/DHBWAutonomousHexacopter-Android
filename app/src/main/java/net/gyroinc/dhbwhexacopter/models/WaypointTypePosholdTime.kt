@@ -11,8 +11,8 @@ class WaypointTypePosholdTime(wpNum: Int, latLng: LatLng, marker: Marker) :
         return Companion.getTypeID()
     }
 
-    override fun getMarkerIcon(): BitmapDescriptor {
-        return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)
+    override fun getMarkerHue(): Float {
+        return BitmapDescriptorFactory.HUE_YELLOW
     }
 
     override fun getTypeString(): String {

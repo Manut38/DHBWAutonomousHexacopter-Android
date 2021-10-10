@@ -6,7 +6,7 @@ class DroneNavStatus(
     val action: Int,
     val wp_number: Int,
     val nav_error: Int,
-    private val target_bearing: Int
+    val target_bearing: Int
 ) {
     companion object {
         const val GPS_MODE_NONE = 0

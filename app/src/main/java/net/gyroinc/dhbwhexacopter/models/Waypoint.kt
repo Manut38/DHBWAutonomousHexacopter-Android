@@ -1,9 +1,9 @@
 package net.gyroinc.dhbwhexacopter.models
 
 import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import org.json.JSONObject
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.primaryConstructor
@@ -21,16 +21,15 @@ abstract class Waypoint(var wpNum: Int, var latLng: LatLng, var marker: Marker) 
 
     init {
         setInfoWindowWPNumber(wpNum)
-        updateMarker()
     }
 
     fun <T : Waypoint> convertTo(type: KClass<T>): T {
         return getInstanceOf(type, wpNum, latLng, marker)
     }
 
-    fun updateMarker() {
+    private fun updateMarker() {
         with(marker) {
-            setIcon(getMarkerIcon())
+            setIcon(BitmapDescriptorFactory.defaultMarker(getMarkerHue()))
             snippet = "Type: " + getTypeString()
             if (isVisibleOnMap()) {
                 isVisible = true
@@ -59,9 +58,13 @@ abstract class Waypoint(var wpNum: Int, var latLng: LatLng, var marker: Marker) 
         return (speed * 100).toInt()
     }
 
+    fun getAltitudeInCm(): Int {
+        return (altitude * 100).toInt()
+    }
+
     abstract fun getTypeID(): Int
 
-    abstract fun getMarkerIcon(): BitmapDescriptor
+    abstract fun getMarkerHue(): Float
 
     abstract fun getTypeString(): String
 
@@ -85,7 +88,9 @@ abstract class Waypoint(var wpNum: Int, var latLng: LatLng, var marker: Marker) 
             marker: Marker
         ): T {
             val actualRuntimeClassConstructor: KFunction<T> = type.primaryConstructor!!
-            return actualRuntimeClassConstructor.call(wpNum, latLng, marker)
+            val waypoint = actualRuntimeClassConstructor.call(wpNum, latLng, marker)
+            waypoint.updateMarker()
+            return waypoint
         }
     }
 }

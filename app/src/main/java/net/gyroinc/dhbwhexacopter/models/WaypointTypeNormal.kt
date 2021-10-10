@@ -1,6 +1,5 @@
 package net.gyroinc.dhbwhexacopter.models
 
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
@@ -11,8 +10,8 @@ class WaypointTypeNormal(wpNum: Int, latLng: LatLng, marker: Marker) :
         return Companion.getTypeID()
     }
 
-    override fun getMarkerIcon(): BitmapDescriptor {
-        return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+    override fun getMarkerHue(): Float {
+        return BitmapDescriptorFactory.HUE_RED
     }
 
     override fun getTypeString(): String {
