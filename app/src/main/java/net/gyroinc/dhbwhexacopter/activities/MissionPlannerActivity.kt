@@ -24,13 +24,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import net.gyroinc.dhbwhexacopter.*
 import net.gyroinc.dhbwhexacopter.fragments.LedControlFragment
-import net.gyroinc.dhbwhexacopter.fragments.MissionPlannerMap
+import net.gyroinc.dhbwhexacopter.map.MissionPlannerMap
 import net.gyroinc.dhbwhexacopter.fragments.WaypointListFragment
 import net.gyroinc.dhbwhexacopter.interfaces.IDroneStatusCallback
 import net.gyroinc.dhbwhexacopter.interfaces.IGpsCallback
 import net.gyroinc.dhbwhexacopter.interfaces.IMqttStatusCallback
 import net.gyroinc.dhbwhexacopter.interfaces.INavStatusCallback
 import net.gyroinc.dhbwhexacopter.models.*
+import net.gyroinc.dhbwhexacopter.mqtt.MQTTConnection
 import net.gyroinc.dhbwhexacopter.utils.LatLngConverter
 import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttToken

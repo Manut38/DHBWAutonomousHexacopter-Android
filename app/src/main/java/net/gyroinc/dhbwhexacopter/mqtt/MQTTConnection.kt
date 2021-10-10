@@ -1,10 +1,11 @@
-package net.gyroinc.dhbwhexacopter
+package net.gyroinc.dhbwhexacopter.mqtt
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import net.gyroinc.dhbwhexacopter.models.DroneGpsStatus
-import net.gyroinc.dhbwhexacopter.models.DroneNavStatus
-import net.gyroinc.dhbwhexacopter.models.DroneStatus
+import net.gyroinc.dhbwhexacopter.interfaces.IDroneStatusCallback
+import net.gyroinc.dhbwhexacopter.interfaces.IGpsCallback
+import net.gyroinc.dhbwhexacopter.interfaces.IMqttStatusCallback
+import net.gyroinc.dhbwhexacopter.interfaces.INavStatusCallback
 import net.gyroinc.dhbwhexacopter.models.Waypoint
 import net.gyroinc.dhbwhexacopter.utils.JsonMessage
 import net.gyroinc.dhbwhexacopter.utils.MqttMessageBuilder
@@ -132,18 +133,3 @@ class MQTTConnection(val context: Context) {
     }
 }
 
-interface IMqttStatusCallback {
-    fun onConnectionLost()
-}
-
-interface IDroneStatusCallback {
-    fun onUpdateReceived(status: DroneStatus)
-}
-
-interface INavStatusCallback {
-    fun onUpdateReceived(status: DroneNavStatus)
-}
-
-interface IGpsCallback {
-    fun onUpdateReceived(status: DroneGpsStatus)
-}

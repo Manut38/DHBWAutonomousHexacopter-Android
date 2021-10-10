@@ -1,4 +1,4 @@
-package net.gyroinc.dhbwhexacopter.fragments
+package net.gyroinc.dhbwhexacopter.map
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -18,6 +18,7 @@ import com.google.android.gms.maps.GoogleMap.OnMyLocationClickListener
 
 import com.google.android.gms.maps.model.*
 import net.gyroinc.dhbwhexacopter.R
+import net.gyroinc.dhbwhexacopter.fragments.WaypointPropertiesFragment
 import net.gyroinc.dhbwhexacopter.models.*
 
 class MissionPlannerMap(
