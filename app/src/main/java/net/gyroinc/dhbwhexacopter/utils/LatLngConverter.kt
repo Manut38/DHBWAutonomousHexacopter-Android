@@ -6,7 +6,7 @@ import net.gyroinc.dhbwhexacopter.models.DroneGpsStatus
 class LatLngConverter {
     companion object {
         fun fromDroneGpsStatus(droneGpsStatus: DroneGpsStatus): LatLng{
-            return LatLng(toLatLngDouble(droneGpsStatus.lon), toLatLngDouble(droneGpsStatus.lat))
+            return LatLng(toLatLngDouble(droneGpsStatus.lat), toLatLngDouble(droneGpsStatus.lon))
         }
 
         fun toLatLngDouble(value: Int): Double {
