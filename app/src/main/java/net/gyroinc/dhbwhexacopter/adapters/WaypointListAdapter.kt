@@ -8,13 +8,14 @@ import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeAdapter
 import net.gyroinc.dhbwhexacopter.BR
 import net.gyroinc.dhbwhexacopter.R
 import net.gyroinc.dhbwhexacopter.databinding.WaypointListItemBinding
+import net.gyroinc.dhbwhexacopter.interfaces.IWaypointItemClickListener
 import net.gyroinc.dhbwhexacopter.models.Waypoint
 
 
 class WaypointListAdapter(
     dataSet: List<Waypoint> = emptyList(),
-    private val itemClickListener: (Waypoint) -> Unit,
-    private val locationClickListener: (Waypoint) -> Unit
+    private val itemClickListener: IWaypointItemClickListener,
+    private val locationClickListener: IWaypointItemClickListener,
 ) :
     DragDropSwipeAdapter<Waypoint, WaypointListAdapter.ViewHolder>(dataSet) {
 
@@ -36,8 +37,8 @@ class WaypointListAdapter(
         position: Int
     ) {
         viewHolder.bind(item)
-        viewHolder.binding.waypointItemLayout.setOnClickListener { itemClickListener(item) }
-        viewHolder.binding.locationIcon.setOnClickListener { locationClickListener(item) }
+        viewHolder.binding.waypointItemLayout.setOnClickListener { itemClickListener.onClick(item) }
+        viewHolder.binding.locationIcon.setOnClickListener { locationClickListener.onClick(item) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

@@ -17,6 +17,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import net.gyroinc.dhbwhexacopter.R
 import net.gyroinc.dhbwhexacopter.adapters.WaypointListAdapter
 import net.gyroinc.dhbwhexacopter.activities.MissionPlannerActivity
+import net.gyroinc.dhbwhexacopter.interfaces.IWaypointItemClickListener
 import net.gyroinc.dhbwhexacopter.models.MainViewModel
 import net.gyroinc.dhbwhexacopter.models.Waypoint
 import net.gyroinc.dhbwhexacopter.models.WaypointTypeJump
@@ -48,27 +49,32 @@ class WaypointListFragment : BottomSheetDialogFragment() {
         waypointList.orientation =
             DragDropSwipeRecyclerView.ListOrientation.VERTICAL_LIST_WITH_VERTICAL_DRAGGING
 
-        val onItemClickListener: (Waypoint) -> Unit = { waypoint ->
-            val dialog = WaypointPropertiesFragment().also { dialog ->
-                dialog.arguments = Bundle().also { bundle ->
-                    bundle.putInt(
-                        "waypointIndex",
-                        waypoint.marker.tag as Int
-                    )
-                }
-                dialog.onDismissListener =
-                    DialogInterface.OnDismissListener {
-                        waypointListAdapter.dataSet = viewModel.waypoints
+        val onItemClickListener = object : IWaypointItemClickListener {
+            override fun onClick(waypoint: Waypoint) {
+                val dialog = WaypointPropertiesFragment().also { dialog ->
+                    dialog.arguments = Bundle().also { bundle ->
+                        bundle.putInt(
+                            "waypointIndex",
+                            waypoint.marker.tag as Int
+                        )
                     }
+                    dialog.onDismissListener =
+                        DialogInterface.OnDismissListener {
+                            waypointListAdapter.dataSet = viewModel.waypoints
+                        }
+                }
+                dialog.show(
+                    (context as AppCompatActivity).supportFragmentManager,
+                    WaypointPropertiesFragment.TAG
+                )
             }
-            dialog.show(
-                (context as AppCompatActivity).supportFragmentManager,
-                WaypointPropertiesFragment.TAG
-            )
         }
-        val onLocationClickListener: (Waypoint) -> Unit = { waypoint ->
-            dismiss()
-            (context as MissionPlannerActivity).focusOnWaypoint(waypoint)
+
+        val onLocationClickListener = object : IWaypointItemClickListener {
+            override fun onClick(waypoint: Waypoint) {
+                dismiss()
+                (context as MissionPlannerActivity).focusOnWaypoint(waypoint)
+            }
         }
 
         waypointListAdapter =
@@ -79,27 +85,38 @@ class WaypointListFragment : BottomSheetDialogFragment() {
             )
         waypointList.adapter = waypointListAdapter
 
-        waypointList.swipeListener = object : OnItemSwipeListener<Waypoint> {
-            override fun onItemSwiped(
-                position: Int,
-                direction: OnItemSwipeListener.SwipeDirection,
-                item: Waypoint
-            ): Boolean {
-                (activity as MissionPlannerActivity).onWaypointRemoved(position)
-                return false
+        waypointList.swipeListener =
+            object : OnItemSwipeListener<Waypoint> {
+                override fun onItemSwiped(
+                    position: Int,
+                    direction: OnItemSwipeListener.SwipeDirection,
+                    item: Waypoint
+                ): Boolean {
+                    (activity as MissionPlannerActivity).onWaypointRemoved(position)
+                    return false
+                }
             }
-        }
-        waypointList.dragListener = object : OnItemDragListener<Waypoint> {
-            override fun onItemDragged(previousPosition: Int, newPosition: Int, item: Waypoint) {}
+        waypointList.dragListener =
+            object : OnItemDragListener<Waypoint> {
+                override fun onItemDragged(
+                    previousPosition: Int,
+                    newPosition: Int,
+                    item: Waypoint
+                ) {
+                }
 
-            override fun onItemDropped(initialPosition: Int, finalPosition: Int, item: Waypoint) {
-                (activity as MissionPlannerActivity).onWaypointIndexChanged(
-                    initialPosition,
-                    finalPosition
-                )
-                waypointListAdapter.notifyDataSetChanged()
+                override fun onItemDropped(
+                    initialPosition: Int,
+                    finalPosition: Int,
+                    item: Waypoint
+                ) {
+                    (activity as MissionPlannerActivity).onWaypointIndexChanged(
+                        initialPosition,
+                        finalPosition
+                    )
+                    waypointListAdapter.notifyDataSetChanged()
+                }
             }
-        }
     }
 
     private fun setupButtonActions(view: View) {
